@@ -10,6 +10,8 @@
 <meta property="og:description" content="Earth. Transfer. Lunar orbit.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://robertbenning.com/">
+<meta property="og:image" content="https://robertbenning.com/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%2304060c'/%3E%3Cpath d='M16 5c3 3 4 8 3 13l-3 3-3-3c-1-5 0-10 3-13z' fill='%23f4f4f2'/%3E%3Ccircle cx='16' cy='13' r='1.6' fill='%2304060c'/%3E%3Cpath d='M13 18l-3 3 1-5zM19 18l3 3-1-5z' fill='%23c9ccd3'/%3E%3Cpath d='M14.5 21h3l-1.5 5z' fill='%23ffb347'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -448,12 +450,13 @@ pad.position.copy(PAD); scene.add(pad);
 const padMats = []; pad.traverse(o => { if (o.isMesh) { o.material = o.material.clone(); o.material.transparent = true; padMats.push([o.material, o.material.opacity]); } });
 
 // intro wireframe (field-scan) — Earth grid + rocket wire, fade out at start
-const wireMat = new THREE.MeshBasicMaterial({ color: 0x8fb4ff, wireframe: true, transparent: true, opacity: 0.0, depthWrite: false, blending: THREE.AdditiveBlending });
+const wireMat = new THREE.MeshBasicMaterial({ color: 0xa9c6ff, wireframe: true, transparent: true, opacity: 0.0, depthWrite: false, blending: THREE.AdditiveBlending });
 const earthWire = new THREE.Mesh(new THREE.SphereGeometry(RE + 0.6, 48, 32), wireMat); scene.add(earthWire);
 const rocketWire = new THREE.Group();
 rocket.children.forEach(c => { if (c.isMesh && c.geometry && !c.material.uniforms) { const w = new THREE.Mesh(c.geometry, wireMat); w.position.copy(c.position); w.rotation.copy(c.rotation); w.scale.copy(c.scale); rocketWire.add(w); } });
 scene.add(rocketWire);
-const solidMats = [...rocketMats, earthMat, moon.material];
+const solidMats = [earthMat, moon.material];
+rocket.traverse(o => { if (o.isMesh && o.material && o.material.isMeshStandardMaterial && !solidMats.includes(o.material)) solidMats.push(o.material); });
 solidMats.forEach(m => { m.transparent = true; m.opacity = 0; });
 clouds.material.opacity = 0;
 
@@ -589,7 +592,7 @@ function resize() {
 addEventListener('resize', resize); resize();
 
 // ---------- frame ----------
-let last = performance.now(), introDone = false;
+let last = performance.now(), introDone = false, introFade = 0;
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
@@ -632,7 +635,7 @@ function frame(now) {
   // pad visibility
   const padA = 1 - sm(0.07, 0.16, p);
   pad.visible = padA > 0.001;
-  if (pad.visible) padMats.forEach(([m, o]) => { m.opacity = o * padA; });
+  if (pad.visible) padMats.forEach(([m, o]) => { m.opacity = o * padA * (introDone ? 1 : introFade); });
   // clouds / bodies
   clouds.rotation.y += dt * 0.006; earth.rotation.y += dt * 0.0012; moon.rotation.y += dt * 0.004;
 
@@ -700,8 +703,8 @@ function frame(now) {
   // intro: wire → solid
   if (!introDone) {
     const i1 = sm(0.2, 1.7, t), i2 = sm(0.9, 3.0, t);
-    wireMat.opacity = (1 - i2) * 0.55 * sm(0.0, 0.5, t);
-    solidMats.forEach(m => m.opacity = i1);
+    wireMat.opacity = (1 - i2) * 0.9 * sm(0.0, 0.4, t);
+    introFade = i1; solidMats.forEach(m => m.opacity = i1);
     clouds.material.opacity = 0.85 * i1;
     if (t > 3.2) { introDone = true; solidMats.forEach(m => { m.opacity = 1; m.transparent = false; m.needsUpdate = true; }); earthWire.visible = false; rocketWire.visible = false; }
   }
