@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Robert Benning</title>
+<title>Dr. Robert Benning</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Robert Benning — Düsseldorf. Earth, transfer, lunar orbit.">
+<meta name="description" content="Dr. Robert Benning — Düsseldorf. Earth, transfer, lunar orbit.">
 <meta name="theme-color" content="#04060c">
-<meta property="og:title" content="Robert Benning">
+<meta property="og:title" content="Dr. Robert Benning">
 <meta property="og:description" content="Earth. Transfer. Lunar orbit.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://robertbenning.com/">
@@ -116,6 +116,67 @@
     .hint svg{animation:none}
     .hud .ph.live i{animation:none}
   }
+  /* ---------- cockpit: helmet visor + glass panel ---------- */
+  #cockpit{position:fixed;inset:0;z-index:8;opacity:0;pointer-events:none;transition:opacity .55s var(--ease)}
+  #cockpit.on{opacity:1}
+  #cockpit .lay{position:absolute;inset:0;width:100%;height:100%;display:block}
+  #cpVisor{z-index:3}
+  #cpFrame{z-index:1}
+  #cpPanel{position:absolute;left:0;right:0;top:56.5%;height:min(33vh,300px);z-index:2;display:flex;gap:min(1.4vw,18px);justify-content:center;align-items:stretch;
+    padding:0 min(9vw,150px);font-family:var(--mono);transform:perspective(1100px) rotateX(8deg);transform-origin:50% 0}
+  #cockpit.on #cpPanel{pointer-events:auto}
+
+  .mfd{flex:1 1 0;min-width:0;border:1px solid rgba(150,200,255,.17);border-radius:9px;
+    background:linear-gradient(165deg,rgba(11,22,36,.94),rgba(4,8,14,.97));
+    box-shadow:inset 0 0 30px rgba(60,130,210,.11),inset 0 1px 0 rgba(180,220,255,.09),0 0 26px rgba(0,0,0,.7);
+    padding:7px 9px 8px;display:flex;flex-direction:column;gap:5px;overflow:hidden;position:relative}
+  .mfd::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(180deg,rgba(255,255,255,.028) 0 1px,rgba(0,0,0,0) 1px 3px)}
+  .mfd-h{display:flex;justify-content:space-between;align-items:baseline;font-size:clamp(7px,.62vw,10px);letter-spacing:.18em;color:rgba(150,200,255,.5);text-transform:uppercase}
+  .mfd-h .ok{color:rgba(120,235,170,.8)}
+  .mfd-c{width:100%;flex:1 1 auto;min-height:0;display:block}
+  .mfd-f{display:flex;justify-content:space-between;font-size:clamp(7px,.6vw,10px);color:rgba(244,244,242,.42);letter-spacing:.08em}
+  .mfd-f b{color:rgba(255,179,71,.85);font-weight:500;font-variant-numeric:tabular-nums}
+
+  .bars{display:flex;flex-direction:column;gap:5px;margin-top:2px}
+  .bar{display:flex;align-items:center;gap:7px;font-size:clamp(7px,.58vw,9.5px);letter-spacing:.1em;color:rgba(244,244,242,.4)}
+  .bar i{font-style:normal;width:2.6em;flex:none}
+  .bar s{flex:1 1 auto;height:5px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden;text-decoration:none;display:block}
+  .bar s em{display:block;height:100%;width:100%;background:linear-gradient(90deg,rgba(120,200,255,.55),rgba(120,235,170,.8));border-radius:2px}
+  .bar b{width:3.2em;text-align:right;color:rgba(244,244,242,.62);font-weight:400;font-variant-numeric:tabular-nums}
+
+  .eng{display:flex;gap:5px;margin-top:2px}
+  .eng span{flex:1;height:3px;border-radius:2px;background:rgba(255,179,71,.75);box-shadow:0 0 7px rgba(255,179,71,.5)}
+  .eng span.off{background:rgba(255,255,255,.13);box-shadow:none}
+
+  .rd{display:grid;grid-template-columns:1fr 1fr;gap:2px 10px;margin-top:6px;font-size:clamp(6.5px,.55vw,9px);letter-spacing:.06em}
+  .rd div{display:flex;gap:6px;align-items:baseline}
+  .rd i{font-style:normal;color:rgba(150,200,255,.32);width:3.4em;flex:none}
+  .rd b{font-weight:400;color:rgba(244,244,242,.3)}
+
+  /* the quiet part of the panel */
+  .comm{margin-top:auto;padding-top:6px;border-top:1px solid rgba(150,200,255,.12);display:flex;flex-direction:column;gap:2px;
+    font-size:clamp(6.5px,.55vw,9px);letter-spacing:.06em}
+  .comm .r{display:flex;gap:6px;align-items:baseline}
+  .comm .r i{font-style:normal;color:rgba(150,200,255,.32);width:3.4em;flex:none}
+  .comm .r b{font-weight:400;color:rgba(244,244,242,.3)}
+  .comm .r a{color:rgba(244,244,242,.17);text-decoration:none;transition:color .35s var(--ease),text-shadow .35s var(--ease)}
+  .comm:hover .r a,.comm.rev .r a,.comm .r a:focus-visible{color:rgba(255,196,110,.95);text-shadow:0 0 10px rgba(255,179,71,.45)}
+  .comm .r a:focus-visible{outline:1px solid rgba(255,179,71,.6);outline-offset:2px}
+
+  #cpExit{position:absolute;left:0;right:0;bottom:2.2vh;z-index:4;text-align:center;font-family:var(--mono);
+    font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:rgba(244,244,242,.3);pointer-events:none}
+
+  body.in-cockpit .hero,body.in-cockpit .hud,body.in-cockpit .track,body.in-cockpit .note,body.in-cockpit .top{opacity:0!important;pointer-events:none;transition:opacity .4s var(--ease)}
+  body.in-cockpit .hint{opacity:0!important;transition:opacity .35s var(--ease)!important}
+
+  @media (max-width:700px){
+    #cpPanel{top:55%;height:min(32vh,270px);padding:0 11vw;gap:9px}
+    .mfd:first-child{display:none}
+    #cpExit{bottom:4.6vh}
+  }
+  @media (prefers-reduced-motion:reduce){ #cpVisor .rf{display:none} }
+
 </style>
 </head>
 <body>
@@ -125,7 +186,7 @@
 
 <div class="ui" id="ui">
   <header class="top">
-    <a class="brand" href="https://robertbenning.com/"><i></i>Robert Benning</a>
+    <a class="brand" href="https://robertbenning.com/"><i></i>Dr Robert Benning</a>
     <nav class="pill" aria-label="Flight phases">
       <button type="button" data-p="0" aria-current="true">Launch</button>
       <button type="button" data-p="0.44">Transfer</button>
@@ -133,7 +194,7 @@
     </nav>
   </header>
 
-  <h1 class="hero" id="hero">Robert Benning<small>Düsseldorf · Earth · Moon</small></h1>
+  <h1 class="hero" id="hero">DR ROBERT BENNING<small>Düsseldorf · Earth · Moon</small></h1>
 
   <div class="hud" id="hud" aria-hidden="true">
     <div class="ph" id="phase"><i></i><span id="phaseTxt">Prelaunch</span></div>
@@ -153,9 +214,119 @@
   <div class="track" aria-hidden="true"><em id="trackFill"></em><s style="top:12%"></s><s style="top:72%"></s><i id="trackDot"></i></div>
 </div>
 
+<div id="cockpit" aria-hidden="true">
+  <svg id="cpFrame" class="lay" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="cpInt" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#0c1119"/><stop offset="0.55" stop-color="#070a11"/><stop offset="1" stop-color="#04060b"/>
+      </linearGradient>
+      <linearGradient id="cpSill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="rgba(170,205,255,.30)"/><stop offset="1" stop-color="rgba(170,205,255,0)"/>
+      </linearGradient>
+    </defs>
+    <path id="cpFramePath" fill="url(#cpInt)" fill-rule="evenodd"/>
+    <path id="cpFrameEdge2" fill="none" stroke="rgba(6,9,14,.9)" stroke-width="9"/>
+    <path id="cpFrameEdge" fill="none" stroke="rgba(178,206,240,.30)" stroke-width="1.3"/>
+    <g id="cpStruts" stroke="rgba(150,190,240,.10)" stroke-width="1" fill="none"></g>
+  </svg>
+
+  <div id="cpPanel">
+    <div class="mfd">
+      <div class="mfd-h"><span>NAV · TRAJ</span><span class="ok" id="navSt">NOMINAL</span></div>
+      <svg class="mfd-c" viewBox="0 0 200 96" preserveAspectRatio="xMidYMid meet">
+        <path id="navPath" d="M20 76 C 64 76 138 40 180 16" fill="none" stroke="rgba(120,200,255,.34)" stroke-width="1" stroke-dasharray="3 4"/>
+        <circle cx="20" cy="76" r="9" fill="none" stroke="rgba(120,200,255,.45)" stroke-width="1"/>
+        <circle cx="180" cy="16" r="5.5" fill="none" stroke="rgba(232,236,242,.5)" stroke-width="1"/>
+        <text x="20" y="93" fill="rgba(244,244,242,.32)" font-size="7" font-family="monospace" text-anchor="middle">EARTH</text>
+        <text x="180" y="31" fill="rgba(244,244,242,.32)" font-size="7" font-family="monospace" text-anchor="middle">MOON</text>
+        <circle id="navDot" cx="20" cy="76" r="2.8" fill="#ffb347"/>
+      </svg>
+      <div class="mfd-f"><span>ETA <b id="navEta">00:00</b></span><span>ΔV <b id="navDv">0</b></span></div>
+    </div>
+
+    <div class="mfd">
+      <div class="mfd-h"><span>PFD</span><span id="pfdMode">PRELAUNCH</span></div>
+      <svg class="mfd-c" viewBox="0 0 200 92" preserveAspectRatio="xMidYMid meet">
+        <defs><clipPath id="adi"><circle cx="100" cy="46" r="33"/></clipPath></defs>
+        <g clip-path="url(#adi)">
+          <g id="adiG">
+            <rect x="-120" y="-300" width="440" height="346" fill="rgba(48,98,168,.5)"/>
+            <rect x="-120" y="46" width="440" height="346" fill="rgba(58,44,30,.62)"/>
+            <line x1="-120" y1="46" x2="320" y2="46" stroke="rgba(255,255,255,.7)" stroke-width="1"/>
+            <g stroke="rgba(255,255,255,.34)" stroke-width=".8">
+              <line x1="86" y1="26" x2="114" y2="26"/><line x1="92" y1="36" x2="108" y2="36"/>
+              <line x1="92" y1="56" x2="108" y2="56"/><line x1="86" y1="66" x2="114" y2="66"/>
+              <line x1="86" y1="6" x2="114" y2="6"/><line x1="86" y1="86" x2="114" y2="86"/>
+            </g>
+          </g>
+        </g>
+        <circle cx="100" cy="46" r="33" fill="none" stroke="rgba(244,244,242,.26)" stroke-width="1"/>
+        <path d="M84 46 h10 l6 6 l6 -6 h10" fill="none" stroke="#ffb347" stroke-width="1.5" stroke-linejoin="round"/>
+        <g font-family="monospace" font-size="7.5" fill="rgba(244,244,242,.55)">
+          <rect x="4" y="18" width="30" height="56" fill="rgba(255,255,255,.035)" stroke="rgba(244,244,242,.13)" stroke-width=".7"/>
+          <rect x="166" y="18" width="30" height="56" fill="rgba(255,255,255,.035)" stroke="rgba(244,244,242,.13)" stroke-width=".7"/>
+          <text x="19" y="14" text-anchor="middle" fill="rgba(150,200,255,.45)" font-size="6.5">KM/H</text>
+          <text x="181" y="14" text-anchor="middle" fill="rgba(150,200,255,.45)" font-size="6.5">ALT</text>
+          <text id="pfdVel" x="19" y="49" text-anchor="middle">0</text>
+          <text id="pfdAlt" x="181" y="49" text-anchor="middle">0</text>
+        </g>
+        <g id="pfdThr"><rect x="70" y="84" width="60" height="4" fill="rgba(255,255,255,.08)"/><rect id="pfdThrBar" x="70" y="84" width="0" height="4" fill="rgba(255,179,71,.85)"/></g>
+      </svg>
+      <div class="mfd-f"><span>PITCH <b id="pfdPitch">90°</b></span><span>THR <b id="pfdThrTxt">0%</b></span></div>
+    </div>
+
+    <div class="mfd">
+      <div class="mfd-h"><span>SYS</span><span class="ok" id="sysSt">ALL NOMINAL</span></div>
+      <div class="bars">
+        <div class="bar"><i>LOX</i><s><em id="barLox"></em></s><b id="valLox">100%</b></div>
+        <div class="bar"><i>CH4</i><s><em id="barCh4"></em></s><b id="valCh4">100%</b></div>
+        <div class="bar"><i>PWR</i><s><em id="barPwr" style="width:97%"></em></s><b>97%</b></div>
+      </div>
+      <div class="eng" id="engRow"><span></span><span></span><span></span></div>
+      <div class="rd">
+        <div><i>CAB</i><b>1013 hPa</b></div><div><i>O2</i><b>21.0 %</b></div>
+        <div><i>TEMP</i><b>21 °C</b></div><div><i>RCS</i><b>ARMED</b></div>
+        <div><i>GNC</i><b>AUTO</b></div><div><i>TM</i><b id="tmRate">32 kbps</b></div>
+      </div>
+      <div class="comm" id="comm" data-hold>
+        <div class="r"><i>UPLINK</i><b>S-BAND · LOCK</b></div>
+        <div class="r"><i>VOICE</i><a href="tel:+4916094907141" aria-label="Phone: +49 160 94907141">+49 160 94907141</a></div>
+        <div class="r"><i>DATA</i><a href="mailto:mail@robertbenning.com" aria-label="E-mail: mail@robertbenning.com">mail@robertbenning.com</a></div>
+      </div>
+    </div>
+  </div>
+
+  <svg id="cpVisor" class="lay" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <clipPath id="visClip"><path id="visClipPath"/></clipPath>
+      <linearGradient id="rfA" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="rgba(255,255,255,0)"/><stop offset=".45" stop-color="rgba(214,232,255,.10)"/><stop offset="1" stop-color="rgba(255,255,255,0)"/>
+      </linearGradient>
+      <linearGradient id="rfB" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0" stop-color="rgba(255,255,255,0)"/><stop offset=".5" stop-color="rgba(255,214,160,.07)"/><stop offset="1" stop-color="rgba(255,255,255,0)"/>
+      </linearGradient>
+      <radialGradient id="rfC" cx=".5" cy="1" r=".8">
+        <stop offset="0" stop-color="rgba(255,186,96,.20)"/><stop offset="1" stop-color="rgba(255,186,96,0)"/>
+      </radialGradient>
+      <linearGradient id="helm" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#080b12"/><stop offset=".6" stop-color="#03050a"/><stop offset="1" stop-color="#010205"/>
+      </linearGradient>
+    </defs>
+    <path id="cpVisorPath" fill="url(#helm)" fill-rule="evenodd"/>
+    <path id="cpVisorRim2" fill="none" stroke="rgba(255,196,110,.16)" stroke-width="6"/>
+    <path id="cpVisorRim" fill="none" stroke="rgba(190,214,248,.34)" stroke-width="1.6"/>
+    <g clip-path="url(#visClip)">
+      <rect class="rf" id="rf1" fill="url(#rfA)"/>
+      <rect class="rf" id="rf2" fill="url(#rfB)"/>
+      <rect id="rf3" fill="url(#rfC)"/>
+    </g>
+  </svg>
+  <div id="cpExit">Click to return outside</div>
+</div>
+
 <div id="curtain" aria-hidden="true"></div>
-<div id="fallback"><div>Robert Benning<br><span style="opacity:.6">This page needs WebGL to fly.</span></div></div>
-<p class="sr">Robert Benning — Düsseldorf. A rocket rises from Earth, transfers through space and enters lunar orbit. Scroll or swipe to fly.</p>
+<div id="fallback"><div>Dr. Robert Benning<br><span style="opacity:.6">This page needs WebGL to fly.</span></div></div>
+<p class="sr">Dr. Robert Benning — Düsseldorf. A rocket rises from Earth, transfers through space and enters lunar orbit. Scroll or swipe to fly; click or tap to switch between the outside view and the cockpit.</p>
 
 <script type="importmap">
 { "imports": { "three": "./vendor/three.module.min.js", "three/addons/": "./vendor/addons/" } }
@@ -345,29 +516,130 @@ const stars2 = makeStars(small ? 5000 : 12000, 3800, 0.6, 1.4, true);
 stars2.material.uniforms.uAlpha.value = 0.55;
 scene.add(stars, stars2);
 
-// ---------- rocket ----------
+// visible sun — gives the polished hull its hot highlight and shows up in every reflection
+const sunSprite = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d');
+  const r = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+  r.addColorStop(0, 'rgba(255,255,255,1)'); r.addColorStop(0.16, 'rgba(255,248,232,1)');
+  r.addColorStop(0.3, 'rgba(255,226,178,.45)'); r.addColorStop(0.62, 'rgba(255,196,132,.12)'); r.addColorStop(1, 'rgba(255,180,110,0)');
+  g.fillStyle = r; g.fillRect(0, 0, 256, 256);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+  s.scale.set(150, 150, 1); s.position.copy(SUN).multiplyScalar(4200); return s;
+})();
+scene.add(sunSprite);
+
+// ---------- rocket: mirror-polished stainless steel ----------
 const rocket = new THREE.Group();
-const white = new THREE.MeshStandardMaterial({ color: 0xf1f1ee, roughness: 0.42, metalness: 0.2 });
-const graphite = new THREE.MeshStandardMaterial({ color: 0x1c2027, roughness: 0.55, metalness: 0.35 });
-const steel = new THREE.MeshStandardMaterial({ color: 0x8b9099, roughness: 0.32, metalness: 0.85 });
-const rocketMats = [white, graphite, steel];
+
+// real-time reflections — a cube camera rides with the vehicle, so the hull mirrors Earth, sun, Moon and plume
+const cubeRT = new THREE.WebGLCubeRenderTarget(small ? 128 : 256, { generateMipmaps: true, minFilter: THREE.LinearMipmapLinearFilter });
+const cubeCam = new THREE.CubeCamera(0.8, 7000, cubeRT);
+scene.add(cubeCam);
+
+// procedural stainless surface: circumferential brush grain + ring welds every barrel section
+const steelSurface = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 512;
+  const g = c.getContext('2d');
+  g.fillStyle = '#c4c4c4'; g.fillRect(0, 0, 512, 512);
+  for (let i = 0; i < 5200; i++) {
+    const y = Math.random() * 512, x = Math.random() * 512, w = 18 + Math.random() * 200;
+    const v = 150 + Math.random() * 86;
+    g.strokeStyle = `rgba(${v},${v},${v},.5)`; g.lineWidth = 0.6 + Math.random() * 0.9;
+    g.beginPath(); g.moveTo(x, y); g.lineTo(x + w, y); g.stroke();
+  }
+  for (let y = 0; y <= 512; y += 64) {           // ring welds between barrel sections
+    const gr = g.createLinearGradient(0, y - 6, 0, y + 6);
+    gr.addColorStop(0, 'rgba(240,240,240,0)'); gr.addColorStop(0.5, 'rgba(244,244,244,.85)'); gr.addColorStop(1, 'rgba(240,240,240,0)');
+    g.fillStyle = gr; g.fillRect(0, y - 6, 512, 12);
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3, 1);
+  t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  return t;
+})();
+
+const chrome = new THREE.MeshStandardMaterial({
+  color: 0xeef2f8, metalness: 1.0, roughness: 0.26,
+  roughnessMap: steelSurface, bumpMap: steelSurface, bumpScale: 0.02,
+  envMap: cubeRT.texture, envMapIntensity: 2.0,
+});
+const chromeDark = new THREE.MeshStandardMaterial({
+  color: 0x8d959f, metalness: 1.0, roughness: 0.42,
+  roughnessMap: steelSurface, envMap: cubeRT.texture, envMapIntensity: 1.3, side: THREE.DoubleSide,
+});
+// windward heat-shield tiles
+const tileTex = (() => {
+  const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d');
+  g.fillStyle = '#0d0f13'; g.fillRect(0, 0, 256, 256);
+  for (let y = 0; y < 256; y += 16) for (let x = 0; x < 256; x += 16) {
+    const v = 14 + Math.random() * 16; g.fillStyle = `rgb(${v},${v + 1},${v + 3})`; g.fillRect(x + 1, y + 1, 14, 14);
+  }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(9, 9); return t;
+})();
+const tileMat = new THREE.MeshStandardMaterial({ color: 0x1a1d22, map: tileTex, roughness: 0.92, metalness: 0.05 });
+const glassMat = new THREE.MeshStandardMaterial({
+  color: 0x05080e, metalness: 0.7, roughness: 0.16, envMap: cubeRT.texture, envMapIntensity: 0.55,
+  emissive: 0x1d3f63, emissiveIntensity: 0.09,
+});
+// hull stencil
+const decalTex = (() => {
+  const c = document.createElement('canvas'); c.width = 220; c.height = 1024; const g = c.getContext('2d');
+  g.clearRect(0, 0, 220, 1024);
+  g.save(); g.translate(110, 512); g.rotate(-Math.PI / 2);
+  g.fillStyle = 'rgba(228,234,242,.78)';
+  g.font = '600 74px Inter, Helvetica, Arial, sans-serif';
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillText('DR ROBERT BENNING', 0, 0);
+  g.restore();
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy()); return t;
+})();
+const flapMat = new THREE.MeshStandardMaterial({
+  color: 0x23272e, map: tileTex, roughness: 0.62, metalness: 0.45,
+  envMap: cubeRT.texture, envMapIntensity: 0.55, transparent: true,
+});
+flapMat.userData.keepTransparent = true;
+const decalMat = new THREE.MeshBasicMaterial({ map: decalTex, transparent: true, opacity: 0.92, depthWrite: false });
+decalMat.userData.keepTransparent = true;
+glassMat.userData.keepTransparent = false;
+
+const R = 1.5;
 {
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(1.32, 1.5, 9.4, 40, 1), white); body.position.y = 4.7; rocket.add(body);
-  const nose = new THREE.Mesh(new THREE.ConeGeometry(1.32, 3.9, 40), white); nose.position.y = 9.4 + 1.95; rocket.add(nose);
-  const band = new THREE.Mesh(new THREE.CylinderGeometry(1.34, 1.34, 0.32, 40), graphite); band.position.y = 8.6; rocket.add(band);
-  const band2 = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.22, 40), graphite); band2.position.y = 0.55; rocket.add(band2);
-  const win = new THREE.Mesh(new THREE.SphereGeometry(0.42, 24, 16), new THREE.MeshStandardMaterial({ color: 0x0b1626, roughness: 0.2, metalness: 0.4, emissive: 0x9cc9ff, emissiveIntensity: 0.9 }));
-  win.position.set(0, 7.2, 1.28); win.scale.set(1, 1, 0.35); rocket.add(win);
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.06, 12, 32), steel); ring.position.set(0, 7.2, 1.36); rocket.add(ring);
-  // fins
-  const fs = new THREE.Shape(); fs.moveTo(0, 0); fs.lineTo(2.2, -1.2); fs.lineTo(2.2, -2.2); fs.lineTo(0, -1.4); fs.lineTo(0, 0);
-  const fg = new THREE.ExtrudeGeometry(fs, { depth: 0.14, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.03, bevelSegments: 2 });
-  fg.translate(1.28, 2.6, -0.07);
-  for (let i = 0; i < 3; i++) { const f = new THREE.Mesh(fg, graphite); f.rotation.y = i * Math.PI * 2 / 3; rocket.add(f); }
-  // engine
-  const skirt = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.05, 1.1, 40, 1, true), graphite); skirt.position.y = -0.55; skirt.material = graphite.clone(); skirt.material.side = THREE.DoubleSide; rocket.add(skirt);
-  const nozzle = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 1.28, 1.7, 40, 1, true), new THREE.MeshStandardMaterial({ color: 0x2b2f36, roughness: 0.3, metalness: 0.9, side: THREE.DoubleSide, emissive: 0xff7a1a, emissiveIntensity: 0 }));
-  nozzle.position.y = -1.9; rocket.add(nozzle); rocket.userData.nozzle = nozzle;
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 10.6, 64, 1), chrome); body.position.y = 5.3; rocket.add(body);
+  // ogive nose
+  const np = []; const NH = 5.0;
+  for (let i = 0; i <= 28; i++) { const t = i / 28; np.push(new THREE.Vector2(Math.max(0.025, R * Math.pow(1 - t * t, 0.56)), 10.6 + NH * t)); }
+  const nose = new THREE.Mesh(new THREE.LatheGeometry(np, 64), chrome); rocket.add(nose);
+  // windward tiles (opposite the camera side)
+  const tiles = new THREE.Mesh(new THREE.CylinderGeometry(R + 0.035, R + 0.035, 10.5, 64, 1, true, Math.PI - 1.45, 2.9), tileMat);
+  tiles.position.y = 5.3; rocket.add(tiles);
+  // hull stencil on the polished side
+  const decal = new THREE.Mesh(new THREE.CylinderGeometry(R + 0.012, R + 0.012, 6.2, 48, 1, true, -0.30, 0.60), decalMat);
+  decal.position.y = 5.0; rocket.add(decal);
+  // cockpit glazing + frame
+  const frameMat = chromeDark.clone(); frameMat.side = THREE.FrontSide;
+  const frame = new THREE.Mesh(new THREE.CylinderGeometry(R + 0.018, R + 0.018, 1.9, 48, 1, true, -0.62, 1.24), frameMat);
+  frame.position.y = 9.5; rocket.add(frame);
+  const win = new THREE.Mesh(new THREE.CylinderGeometry(R + 0.042, R + 0.042, 1.5, 48, 1, true, -0.52, 1.04), glassMat);
+  win.position.y = 9.5; rocket.add(win); rocket.userData.win = win;
+  // flaps (leeward side, facing the camera)
+  const mkFlap = (span, chord, thick) => {
+    const s = new THREE.Shape();
+    s.moveTo(0, 0); s.lineTo(span * 0.94, -chord * 0.22); s.lineTo(span, -chord * 0.78); s.lineTo(0, -chord); s.closePath();
+    const g = new THREE.ExtrudeGeometry(s, { depth: thick, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.07, bevelSegments: 2 });
+    g.translate(R - 0.2, 0, -thick / 2); return g;
+  };
+  const AZ = -Math.PI / 2; rocket.userData.flaps = [];
+  const fwdG = mkFlap(1.5, 2.0, 0.24), aftG = mkFlap(2.4, 3.2, 0.3);
+  [-0.62, 0.62].forEach(d => { const f = new THREE.Mesh(fwdG, flapMat); f.position.y = 11.9; f.rotation.y = AZ + d; rocket.add(f); rocket.userData.flaps.push(f); });
+  [-0.58, 0.58].forEach(d => { const f = new THREE.Mesh(aftG, flapMat); f.position.y = 4.3; f.rotation.y = AZ + d; rocket.add(f); rocket.userData.flaps.push(f); });
+  // engine bay
+  const skirt = new THREE.Mesh(new THREE.CylinderGeometry(R, R * 0.94, 1.0, 64, 1, true), chromeDark); skirt.position.y = -0.5; rocket.add(skirt);
+  const bp = []; for (let i = 0; i <= 16; i++) { const t = i / 16; bp.push(new THREE.Vector2(0.24 + 0.66 * Math.pow(t, 1.8), -0.05 - 1.6 * t)); }
+  const bellGeo = new THREE.LatheGeometry(bp, 36);
+  const bellMat = new THREE.MeshStandardMaterial({ color: 0x40454e, metalness: 0.95, roughness: 0.3, side: THREE.DoubleSide, envMap: cubeRT.texture, envMapIntensity: 1.1, emissive: 0xff7a1a, emissiveIntensity: 0 });
+  for (let i = 0; i < 3; i++) { const b = new THREE.Mesh(bellGeo, bellMat); const a = i * Math.PI * 2 / 3 + 0.5; b.position.set(Math.cos(a) * 0.6, -0.5, Math.sin(a) * 0.6); rocket.add(b); }
+  rocket.userData.nozzle = { material: bellMat };
 }
 scene.add(rocket);
 
@@ -437,16 +709,23 @@ const pad = new THREE.Group();
   const plate = new THREE.Mesh(new THREE.CylinderGeometry(6.5, 7.2, 0.5, 48), new THREE.MeshStandardMaterial({ color: 0x1a1d23, roughness: 0.8, metalness: 0.2 }));
   plate.position.y = -0.25; pad.add(plate);
   const ringM = new THREE.Mesh(new THREE.TorusGeometry(6.2, 0.06, 8, 64), new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.6, roughness: 1 }));
+  ringM.userData.noReflect = true;
   ringM.rotation.x = Math.PI / 2; ringM.position.y = 0.02; pad.add(ringM);
   const towerM = new THREE.MeshStandardMaterial({ color: 0x2a2f38, roughness: 0.6, metalness: 0.5 });
   const tower = new THREE.Mesh(new THREE.BoxGeometry(0.7, 15, 0.7), towerM); tower.position.set(-4.2, 7.5, -1.5); pad.add(tower);
   for (let i = 0; i < 4; i++) { const arm = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.16, 0.16), towerM); arm.position.set(-2.9, 3 + i * 3.2, -1.5); pad.add(arm); }
   const lampM = new THREE.MeshStandardMaterial({ color: 0xffe0b0, emissive: 0xffc070, emissiveIntensity: 2.2 });
-  [[5.2, 0, 3.4], [-5.2, 0, 3.4], [5.2, 0, -3.4], [-4.2, 15.2, -1.5]].forEach(([x, y, z]) => { const l = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 8), lampM); l.position.set(x, y + 0.2, z); pad.add(l); });
+  [[5.2, 0, 3.4], [-5.2, 0, 3.4], [5.2, 0, -3.4], [-4.2, 15.2, -1.5]].forEach(([x, y, z]) => { const l = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 8), lampM); l.position.set(x, y + 0.2, z); l.userData.noReflect = true; pad.add(l); });
   const gnd = new THREE.Mesh(new THREE.CircleGeometry(40, 64), new THREE.MeshStandardMaterial({ color: 0x141a24, roughness: 1, transparent: true, opacity: 0.4, depthWrite: false }));
   gnd.rotation.x = -Math.PI / 2; gnd.position.y = 0.01; pad.add(gnd);
 }
+const floods = [];
+[[9, 3.5, 7], [-9, 3.2, 6], [7, 3.0, -8]].forEach(([x, y, z]) => {
+  const l = new THREE.PointLight(0xdfe8ff, 0, 120, 1.25);
+  l.position.set(PAD.x + x, PAD.y + y, PAD.z + z); scene.add(l); floods.push(l);
+});
 pad.position.copy(PAD); scene.add(pad);
+const noReflect = []; scene.traverse(o => { if (o.userData && o.userData.noReflect) noReflect.push(o); });
 const padMats = []; pad.traverse(o => { if (o.isMesh) { o.material = o.material.clone(); o.material.transparent = true; padMats.push([o.material, o.material.opacity]); } });
 
 // intro wireframe (field-scan) — Earth grid + rocket wire, fade out at start
@@ -457,19 +736,20 @@ rocket.children.forEach(c => { if (c.isMesh && c.geometry && !c.material.uniform
 scene.add(rocketWire);
 const solidMats = [earthMat, moon.material];
 rocket.traverse(o => { if (o.isMesh && o.material && o.material.isMeshStandardMaterial && !solidMats.includes(o.material)) solidMats.push(o.material); });
+solidMats.push(decalMat);
 solidMats.forEach(m => { m.transparent = true; m.opacity = 0; });
 clouds.material.opacity = 0;
 
 // ---------- post ----------
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), small ? 0.42 : 0.55, 0.42, 0.86);
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), small ? 0.4 : 0.5, 0.4, 0.92);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
 
 // ---------- state ----------
 const state = { target: 0, p: 0, mx: 0, my: 0, smx: 0, smy: 0, t0: performance.now(), started: false, lastInput: performance.now() };
-window.__rb = { state, setProgress: (v, snap = true) => { state.target = THREE.MathUtils.clamp(v, 0, 1); if (snap) state.p = state.target; }, path, camera };
+window.__rb = { scene, rocket, camera, THREE, state, setProgress: (v, snap = true) => { state.target = THREE.MathUtils.clamp(v, 0, 1); if (snap) state.p = state.target; }, path, camera };
 
 // input: wheel / touch / keys / buttons — the page never scrolls; we drive a virtual progress
 const WHEEL_K = 0.00036;
@@ -487,7 +767,7 @@ addEventListener('keydown', (e) => {
 });
 addEventListener('pointermove', (e) => { if (e.pointerType === 'touch') return; state.mx = (e.clientX / innerWidth) * 2 - 1; state.my = (e.clientY / innerHeight) * 2 - 1; }, { passive: true });
 document.querySelectorAll('.pill button').forEach(b => b.addEventListener('click', () => { state.target = parseFloat(b.dataset.p); state.lastInput = performance.now(); }));
-function nudge(d) { state.target = THREE.MathUtils.clamp(state.target + d, 0, 1); state.lastInput = performance.now(); if (!state.started && state.target > 0.002) { state.started = true; hint.classList.add('dim'); hintTxt.textContent = isTouch ? 'Swipe' : 'Scroll'; } }
+function nudge(d) { state.target = THREE.MathUtils.clamp(state.target + d, 0, 1); state.lastInput = performance.now(); if (!state.started && state.target > 0.002) { state.started = true; hint.classList.add('dim'); hintTxt.textContent = isTouch ? 'Tap to board' : 'Click to board'; } }
 if (isTouch) document.getElementById('hintTxt').textContent = 'Swipe up to launch';
 
 // ---------- UI refs ----------
@@ -497,6 +777,103 @@ const hint = document.getElementById('hint'), hintTxt = document.getElementById(
 const trackDot = document.getElementById('trackDot'), trackFill = document.getElementById('trackFill'), sky = document.getElementById('sky');
 const pillBtns = [...document.querySelectorAll('.pill button')];
 
+
+// ---------- cockpit: helmet visor, window aperture, glass panel ----------
+const cockpit = document.getElementById('cockpit');
+const cpFrame = document.getElementById('cpFrame'), cpVisor = document.getElementById('cpVisor');
+const $ = (id) => document.getElementById(id);
+const cpEls = {
+  framePath: $('cpFramePath'), edge: $('cpFrameEdge'), edge2: $('cpFrameEdge2'), struts: $('cpStruts'),
+  visorPath: $('cpVisorPath'), rim: $('cpVisorRim'), rim2: $('cpVisorRim2'), clip: $('visClipPath'),
+  rf1: $('rf1'), rf2: $('rf2'), rf3: $('rf3'), exit: $('cpExit'),
+  navPath: $('navPath'), navDot: $('navDot'), navEta: $('navEta'), navDv: $('navDv'), navSt: $('navSt'),
+  adiG: $('adiG'), pfdMode: $('pfdMode'), pfdVel: $('pfdVel'), pfdAlt: $('pfdAlt'), pfdPitch: $('pfdPitch'),
+  pfdThrBar: $('pfdThrBar'), pfdThrTxt: $('pfdThrTxt'),
+  barLox: $('barLox'), barCh4: $('barCh4'), valLox: $('valLox'), valCh4: $('valCh4'),
+  engRow: $('engRow'), sysSt: $('sysSt'), comm: $('comm'),
+};
+const engDots = [...cpEls.engRow.children];
+const cpGeom = { axisY: 0 };
+
+function roundPoly(pts, r) {
+  let d = '', n = pts.length;
+  for (let i = 0; i < n; i++) {
+    const p0 = pts[(i - 1 + n) % n], p1 = pts[i], p2 = pts[(i + 1) % n];
+    const ax = p0[0] - p1[0], ay = p0[1] - p1[1], la = Math.hypot(ax, ay) || 1;
+    const bx = p2[0] - p1[0], by = p2[1] - p1[1], lb = Math.hypot(bx, by) || 1;
+    const rr = Math.min(r, la / 2, lb / 2);
+    const a = [p1[0] + ax / la * rr, p1[1] + ay / la * rr], b = [p1[0] + bx / lb * rr, p1[1] + by / lb * rr];
+    d += (i ? 'L' : 'M') + a[0].toFixed(1) + ' ' + a[1].toFixed(1) + 'Q' + p1[0].toFixed(1) + ' ' + p1[1].toFixed(1) + ' ' + b[0].toFixed(1) + ' ' + b[1].toFixed(1);
+  }
+  return d + 'Z';
+}
+function blobPath(x0, y0, x1, y1, kx, ky) {
+  const xm = (x0 + x1) / 2, ym = (y0 + y1) / 2, dx = (x1 - x0) * kx, dy = (y1 - y0) * ky;
+  const f = (v) => v.toFixed(1);
+  return `M${f(x0)} ${f(ym)}C${f(x0)} ${f(ym - dy)} ${f(xm - dx)} ${f(y0)} ${f(xm)} ${f(y0)}` +
+         `C${f(xm + dx)} ${f(y0)} ${f(x1)} ${f(ym - dy)} ${f(x1)} ${f(ym)}` +
+         `C${f(x1)} ${f(ym + dy)} ${f(xm + dx)} ${f(y1)} ${f(xm)} ${f(y1)}` +
+         `C${f(xm - dx)} ${f(y1)} ${f(x0)} ${f(ym + dy)} ${f(x0)} ${f(ym)}Z`;
+}
+function layoutCockpit() {
+  const W = innerWidth, H = innerHeight, port = H > W;
+  cpFrame.setAttribute('viewBox', `0 0 ${W} ${H}`); cpVisor.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const full = `M0 0H${W}V${H}H0Z`;
+  // windscreen aperture
+  const wx0 = W * (port ? 0.095 : 0.155), wx1 = W - wx0;
+  const wy0 = H * (port ? 0.115 : 0.085), wy1 = H * (port ? 0.495 : 0.545);
+  const ins = (wx1 - wx0) * 0.055;
+  cpGeom.axisY = (wy0 + wy1) / 2;
+  const wp = roundPoly([[wx0 + ins, wy0], [wx1 - ins, wy0], [wx1, wy1], [wx0, wy1]], Math.min(36, (wx1 - wx0) * 0.07));
+  cpEls.framePath.setAttribute('d', full + wp);
+  cpEls.edge.setAttribute('d', wp); cpEls.edge2.setAttribute('d', wp);
+  // interior structure: sill under the glass + two frame ribs
+  const sy = wy1, mid = (wx0 + wx1) / 2;
+  cpEls.struts.innerHTML =
+    `<path d="M${wx0} ${sy + 10}H${wx1}"/>` +
+    `<path d="M${mid} ${wy0 + 4}V${wy1 - 4}" stroke="rgba(150,190,240,.07)"/>` +
+    `<path d="M${wx0 - 26} ${wy0 - 18}H${wx1 + 26}"/>` +
+    `<path d="M${W * 0.5 - 120} ${sy + 26}H${W * 0.5 + 120}" stroke="rgba(150,190,240,.06)"/>`;
+  // helmet visor aperture
+  const vx0 = W * 0.05, vx1 = W * 0.95, vy0 = H * 0.035, vy1 = H * 0.972;
+  const vp = blobPath(vx0, vy0, vx1, vy1, 0.34, 0.46);
+  cpEls.visorPath.setAttribute('d', full + vp);
+  cpEls.rim.setAttribute('d', vp); cpEls.rim2.setAttribute('d', vp); cpEls.clip.setAttribute('d', vp);
+  const setR = (el, x, y, w, h, rot) => { el.setAttribute('x', x); el.setAttribute('y', y); el.setAttribute('width', w); el.setAttribute('height', h); if (rot) el.setAttribute('transform', rot); };
+  const rot = `rotate(-17 ${W / 2} ${H / 2})`;
+  setR(cpEls.rf1, -W * 0.3, H * 0.055, W * 1.6, H * 0.085, rot);
+  setR(cpEls.rf2, -W * 0.3, H * 0.28, W * 1.6, H * 0.038, rot);
+  setR(cpEls.rf3, 0, H * 0.42, W, H * 0.58);
+}
+layoutCockpit();
+addEventListener('resize', layoutCockpit);
+if (isTouch) cpEls.exit.textContent = 'Tap to return outside';
+
+state.cock = 0; state.cockTarget = 0;
+function setCockpit(on, snap) {
+  state.cockTarget = on ? 1 : 0;
+  if (snap) state.cock = state.cockTarget;
+  cockpit.classList.toggle('on', on);
+  document.body.classList.toggle('in-cockpit', on);
+  cockpit.setAttribute('aria-hidden', on ? 'false' : 'true');
+  if (!on) hintTxt.textContent = state.started ? (isTouch ? 'Tap to board' : 'Click to board') : (isTouch ? 'Swipe up to launch' : 'Scroll to launch');
+}
+let tap = null;
+addEventListener('pointerdown', (e) => {
+  tap = { x: e.clientX, y: e.clientY, t: performance.now(), ok: !(e.target.closest && e.target.closest('a,button,[data-hold]')) };
+}, { passive: true });
+addEventListener('pointerup', (e) => {
+  if (tap && tap.ok && Math.hypot(e.clientX - tap.x, e.clientY - tap.y) < 12 && performance.now() - tap.t < 700) setCockpit(state.cockTarget < 0.5);
+  tap = null;
+}, { passive: true });
+addEventListener('pointercancel', () => { tap = null; }, { passive: true });
+addEventListener('keydown', (e) => {
+  if (e.target && e.target.closest && e.target.closest('a,button')) return;
+  if (e.key === 'c' || e.key === 'C') { e.preventDefault(); setCockpit(state.cockTarget < 0.5); }
+});
+cpEls.comm.addEventListener('pointerdown', () => cpEls.comm.classList.add('rev'));
+window.__rb.setCockpit = setCockpit;
+
 // ---------- helpers ----------
 const sm = (a, b, x) => { const t = THREE.MathUtils.clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
 const tmpV = new THREE.Vector3(), tmpV2 = new THREE.Vector3(), tmpV3 = new THREE.Vector3(), tmpQ = new THREE.Quaternion();
@@ -505,6 +882,7 @@ const rocketPos = new THREE.Vector3(), rocketDir = new THREE.Vector3(0, 1, 0);
 const camPos = new THREE.Vector3(), camLook = new THREE.Vector3();
 const A_pos = new THREE.Vector3(), A_look = new THREE.Vector3(), B_pos = new THREE.Vector3(), B_look = new THREE.Vector3(), C_pos = new THREE.Vector3(), C_look = new THREE.Vector3();
 const shakeV = new THREE.Vector3();
+const IN_pos = new THREE.Vector3(), IN_look = new THREE.Vector3(), aim = new THREE.Vector3(), sideI = new THREE.Vector3(), binI = new THREE.Vector3(), tmpA = new THREE.Vector3();
 
 // rocket kinematics
 function evalRocket(p) {
@@ -583,16 +961,19 @@ const fmtVel = (kmh) => kmh.toLocaleString('en-US', { maximumFractionDigits: 0 }
 let phaseName = '', hudTick = 0, lastHudP = -1;
 
 // resize
+let baseFov = 46;
 function resize() {
   const w = innerWidth, h = innerHeight;
   camera.aspect = w / h; camera.updateProjectionMatrix();
   renderer.setSize(w, h); composer.setSize(w, h);
-  camera.fov = w < h ? 58 : 46; camera.updateProjectionMatrix();
+  baseFov = w < h ? 58 : 46;
+  camera.fov = baseFov; camera.updateProjectionMatrix();
 }
 addEventListener('resize', resize); resize();
 
 // ---------- frame ----------
 let last = performance.now(), introDone = false, introFade = 0;
+let cubeTick = 0; const CUBE_EVERY = small ? 3 : 2;
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
@@ -614,7 +995,7 @@ function frame(now) {
   tmpQ.setFromUnitVectors(UP, rocketDir);
   rocket.quaternion.copy(tmpQ);
   // slow roll while flying
-  rocket.rotateY(t * 0.25);
+  rocket.rotateY(t * 0.085);
   const thr = throttleFor(p);
   // pad vibration on ignition
   if (p > 0.008 && p < 0.06) { rocket.position.x += (Math.random() - 0.5) * 0.06 * thr; rocket.position.z += (Math.random() - 0.5) * 0.06 * thr; }
@@ -636,6 +1017,7 @@ function frame(now) {
   const padA = 1 - sm(0.07, 0.16, p);
   pad.visible = padA > 0.001;
   if (pad.visible) padMats.forEach(([m, o]) => { m.opacity = o * padA * (introDone ? 1 : introFade); });
+  { const fi = padA * (introDone ? 1 : introFade) * 4.5; floods.forEach(l => l.intensity = fi); }
   // clouds / bodies
   clouds.rotation.y += dt * 0.006; earth.rotation.y += dt * 0.0012; moon.rotation.y += dt * 0.004;
 
@@ -688,6 +1070,39 @@ function frame(now) {
   const shake = thr * (p < 0.14 ? 0.35 : 0.08) * sway;
   shakeV.set((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake, 0);
   camera.position.add(shakeV);
+
+  // ----- cockpit: fly the camera inside and look out through the visor -----
+  state.cock += (state.cockTarget - state.cock) * Math.min(1, dt * 2.3);
+  if (Math.abs(state.cockTarget - state.cock) < 0.0008) state.cock = state.cockTarget;
+  const cr = state.cock, ck = cr < 0.5 ? 2 * cr * cr : 1 - Math.pow(2 - 2 * cr, 2) / 2;
+  if (ck > 0.0004) {
+    sideI.set(rocketDir.y, -rocketDir.x, 0); if (sideI.lengthSq() < 1e-4) sideI.set(1, 0, 0); sideI.normalize();
+    binI.crossVectors(sideI, rocketDir).normalize();
+    IN_pos.copy(rocketPos).addScaledVector(rocketDir, 8.7);
+    // early: Earth fills the windscreen. transfer: the Moon sits ahead. orbit: the surface sweeps past.
+    tmpA.copy(IN_pos).addScaledVector(binI, RE * 0.6).setLength(RE * 0.93);
+    aim.subVectors(tmpA, IN_pos).normalize();
+    tmpA.subVectors(M, IN_pos).normalize().multiplyScalar(0.97).addScaledVector(rocketDir, 0.20).normalize();
+    aim.lerp(tmpA, sm(0.16, 0.58, p)).normalize();
+    if (p > T_ORBIT - 0.12) {
+      tmpA.subVectors(M, IN_pos).normalize().multiplyScalar(0.85).addScaledVector(rocketDir, 0.53).normalize();
+      aim.lerp(tmpA, sm(T_ORBIT - 0.12, T_ORBIT + 0.04, p)).normalize();
+    }
+    aim.applyAxisAngle(rocketDir, -state.smx * 0.30 * sway);
+    tmpA.crossVectors(aim, rocketDir).normalize();
+    aim.applyAxisAngle(tmpA, -state.smy * 0.16 * sway);
+    IN_look.copy(IN_pos).addScaledVector(aim, 90);
+    if (thr > 0.05 && !reduced) IN_pos.addScaledVector(sideI, (Math.random() - 0.5) * 0.05 * thr).addScaledVector(binI, (Math.random() - 0.5) * 0.05 * thr);
+    camera.position.lerp(IN_pos, ck);
+    camLook.lerp(IN_look, ck);
+    camera.up.copy(UP).lerp(rocketDir, ck).normalize();
+  } else if (camera.up.y !== 1) camera.up.set(0, 1, 0);
+  { const fo = 1 - sm(0.55, 0.9, ck); flapMat.opacity = fo; rocket.userData.flaps.forEach(f => f.visible = fo > 0.01); }
+  camera.fov = baseFov * (1 + 0.36 * ck);
+  if (ck > 0.0004) camera.setViewOffset(innerWidth, innerHeight, 0, (innerHeight / 2 - cpGeom.axisY) * ck, innerWidth, innerHeight);
+  else if (camera.view && camera.view.enabled) camera.clearViewOffset();
+  else camera.updateProjectionMatrix();
+
   camera.lookAt(camLook);
   fill.position.copy(camera.position); fill.target.position.copy(rocketPos);
 
@@ -706,7 +1121,7 @@ function frame(now) {
     wireMat.opacity = (1 - i2) * 0.9 * sm(0.0, 0.4, t);
     introFade = i1; solidMats.forEach(m => m.opacity = i1);
     clouds.material.opacity = 0.85 * i1;
-    if (t > 3.2) { introDone = true; solidMats.forEach(m => { m.opacity = 1; m.transparent = false; m.needsUpdate = true; }); earthWire.visible = false; rocketWire.visible = false; }
+    if (t > 3.2) { introDone = true; solidMats.forEach(m => { m.opacity = 1; if (!m.userData.keepTransparent) m.transparent = false; m.needsUpdate = true; }); earthWire.visible = false; rocketWire.visible = false; }
   }
   if (t > 0.15 && !document.body.classList.contains('ready')) { document.body.classList.add('ready'); document.getElementById('curtain').classList.add('gone'); }
 
@@ -726,6 +1141,42 @@ function frame(now) {
     pillBtns.forEach((b, i) => b.setAttribute('aria-current', i === cur ? 'true' : 'false'));
     note.classList.toggle('show', p > 0.9);
     hint.style.opacity = state.started ? (p > 0.985 ? '0' : '') : '';
+
+    if (state.cock > 0.02 || state.cockTarget > 0) {
+      const e = cpEls;
+      try {
+        const L = e.navPath.getTotalLength();
+        if (L > 0) { const q = e.navPath.getPointAtLength(L * Math.min(1, p / T_ORBIT)); e.navDot.setAttribute('cx', q.x.toFixed(1)); e.navDot.setAttribute('cy', q.y.toFixed(1)); }
+      } catch (_) {}
+      e.navEta.textContent = fmtT(Math.max(0, (1 - p) * 60 * 62));
+      e.navDv.textContent = Math.round(Math.max(0, 3180 - p * 3050)) + ' m/s';
+      e.navSt.textContent = p < 0.012 ? 'HOLD' : p > 0.9 ? 'CAPTURED' : 'NOMINAL';
+      const pitchDeg = 90 - 90 * sm(0.05, 0.58, p);
+      const roll = Math.sin(t * 0.21) * 2.6 * (p > 0.012 ? 1 : 0.2);
+      e.adiG.setAttribute('transform', `rotate(${roll.toFixed(2)} 100 46) translate(0 ${(pitchDeg * 0.42).toFixed(1)})`);
+      e.pfdPitch.textContent = pitchDeg.toFixed(0) + '\u00b0';
+      e.pfdMode.textContent = ph.toUpperCase();
+      e.pfdVel.textContent = Math.round(vel).toLocaleString('en-US');
+      e.pfdAlt.textContent = fmtAlt(alt);
+      e.pfdThrBar.setAttribute('width', (60 * thr).toFixed(1));
+      e.pfdThrTxt.textContent = Math.round(thr * 100) + '%';
+      const lox = 100 - 84 * sm(0.012, 0.78, p), ch4 = 100 - 87 * sm(0.012, 0.78, p);
+      e.barLox.style.width = lox.toFixed(0) + '%'; e.valLox.textContent = lox.toFixed(0) + '%';
+      e.barCh4.style.width = ch4.toFixed(0) + '%'; e.valCh4.textContent = ch4.toFixed(0) + '%';
+      engDots.forEach(d => d.classList.toggle('off', thr < 0.05));
+      e.sysSt.textContent = thr > 0.05 ? 'BURN' : p > 0.9 ? 'ORBIT · ALL NOM' : 'ALL NOMINAL';
+    }
+  }
+
+  // hull reflections: re-shoot the environment cube from the vehicle (without the vehicle itself)
+  if ((cubeTick++ % CUBE_EVERY) === 0) {
+    cubeCam.position.copy(rocket.position).addScaledVector(rocketDir, 4.5);
+    const rv = rocket.visible, wv = rocketWire.visible;
+    rocket.visible = false; rocketWire.visible = false; sunSprite.visible = false;
+    noReflect.forEach(o => o.visible = false);
+    cubeCam.update(renderer, scene);
+    rocket.visible = rv; rocketWire.visible = wv; sunSprite.visible = true;
+    noReflect.forEach(o => o.visible = true);
   }
 
   composer.render();
