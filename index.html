@@ -121,7 +121,7 @@
   #cockpit.on{opacity:1}
   #cockpit .lay{position:absolute;inset:0;width:100%;height:100%;display:block}
   #cpVisor{z-index:3}
-  #cpFrame{z-index:1}
+  #cpFrame{display:none}
   #cpPanel{position:absolute;left:0;right:0;top:56.5%;height:min(33vh,300px);z-index:2;display:flex;gap:min(1.4vw,18px);justify-content:center;align-items:stretch;
     padding:0 min(9vw,150px);font-family:var(--mono);transform:perspective(1100px) rotateX(8deg);transform-origin:50% 0}
   #cockpit.on #cpPanel{pointer-events:auto}
@@ -152,14 +152,14 @@
   .rd{display:grid;grid-template-columns:1fr 1fr;gap:2px 10px;margin-top:6px;font-size:clamp(6.5px,.55vw,9px);letter-spacing:.06em}
   .rd div{display:flex;gap:6px;align-items:baseline}
   .rd i{font-style:normal;color:rgba(150,200,255,.32);width:3.4em;flex:none}
-  .rd b{font-weight:400;color:rgba(244,244,242,.3)}
+  .rd b{font-weight:400;color:rgba(244,244,242,.3);white-space:nowrap}
 
   /* the quiet part of the panel */
   .comm{margin-top:auto;padding-top:6px;border-top:1px solid rgba(150,200,255,.12);display:flex;flex-direction:column;gap:2px;
     font-size:clamp(6.5px,.55vw,9px);letter-spacing:.06em}
   .comm .r{display:flex;gap:6px;align-items:baseline}
   .comm .r i{font-style:normal;color:rgba(150,200,255,.32);width:3.4em;flex:none}
-  .comm .r b{font-weight:400;color:rgba(244,244,242,.3)}
+  .comm .r b{font-weight:400;color:rgba(244,244,242,.3);white-space:nowrap}
   .comm .r a{color:rgba(244,244,242,.17);text-decoration:none;transition:color .35s var(--ease),text-shadow .35s var(--ease)}
   .comm:hover .r a,.comm.rev .r a,.comm .r a:focus-visible{color:rgba(255,196,110,.95);text-shadow:0 0 10px rgba(255,179,71,.45)}
   .comm .r a:focus-visible{outline:1px solid rgba(255,179,71,.6);outline-offset:2px}
@@ -171,11 +171,16 @@
   body.in-cockpit .hint{opacity:0!important;transition:opacity .35s var(--ease)!important}
 
   @media (max-width:700px){
-    #cpPanel{top:55%;height:min(32vh,270px);padding:0 11vw;gap:9px}
+    #cpPanel{top:50%;height:min(31vh,262px);padding:0 6vw;gap:8px}
     .mfd:first-child{display:none}
     #cpExit{bottom:4.6vh}
   }
-  @media (prefers-reduced-motion:reduce){ #cpVisor .rf{display:none} }
+  #cpVisor .rf{animation:visdrift 19s var(--ease) infinite alternate}
+  #cpVisor #rf2{animation-duration:27s;animation-direction:alternate-reverse}
+  @keyframes visdrift{0%{transform:translate(-1.1%,-0.5%)}100%{transform:translate(1.5%,0.8%)}}
+  #cpFog{animation:breathe 4.6s ease-in-out infinite}
+  @keyframes breathe{0%,100%{opacity:.35}45%{opacity:1}}
+  @media (prefers-reduced-motion:reduce){ #cpVisor .rf,#cpFog{animation:none} #cpVisor .rf{display:none} }
 
 </style>
 </head>
@@ -298,27 +303,43 @@
 
   <svg id="cpVisor" class="lay" xmlns="http://www.w3.org/2000/svg">
     <defs>
+      <!-- Der Helmrand sitzt ~15 cm vor dem Auge und ist damit vollstaendig unscharf.
+           Eine scharfe Vektorkante verraet sofort die Grafik, deshalb wird er weichgezeichnet. -->
+      <filter id="visSoft" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+        <feGaussianBlur stdDeviation="21"/>
+      </filter>
+      <filter id="visSoft2" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+        <feGaussianBlur stdDeviation="9"/>
+      </filter>
       <clipPath id="visClip"><path id="visClipPath"/></clipPath>
+      <radialGradient id="noseG" cx="0.5" cy="1" r="0.62">
+        <stop offset="0" stop-color="#03050a" stop-opacity=".9"/>
+        <stop offset=".5" stop-color="#03050a" stop-opacity=".45"/>
+        <stop offset="1" stop-color="#03050a" stop-opacity="0"/>
+      </radialGradient>
+      <radialGradient id="fogG" cx="0.5" cy="1" r="0.62">
+        <stop offset="0" stop-color="rgba(198,220,250,.15)"/><stop offset="1" stop-color="rgba(198,220,250,0)"/>
+      </radialGradient>
       <linearGradient id="rfA" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="rgba(255,255,255,0)"/><stop offset=".45" stop-color="rgba(214,232,255,.10)"/><stop offset="1" stop-color="rgba(255,255,255,0)"/>
+        <stop offset="0" stop-color="rgba(255,255,255,0)"/><stop offset=".45" stop-color="rgba(206,228,255,.13)"/><stop offset="1" stop-color="rgba(255,255,255,0)"/>
       </linearGradient>
       <linearGradient id="rfB" x1="0" y1="1" x2="1" y2="0">
-        <stop offset="0" stop-color="rgba(255,255,255,0)"/><stop offset=".5" stop-color="rgba(255,214,160,.07)"/><stop offset="1" stop-color="rgba(255,255,255,0)"/>
+        <stop offset="0" stop-color="rgba(255,255,255,0)"/><stop offset=".5" stop-color="rgba(255,214,160,.09)"/><stop offset="1" stop-color="rgba(255,255,255,0)"/>
       </linearGradient>
       <radialGradient id="rfC" cx=".5" cy="1" r=".8">
-        <stop offset="0" stop-color="rgba(255,186,96,.20)"/><stop offset="1" stop-color="rgba(255,186,96,0)"/>
+        <stop offset="0" stop-color="rgba(150,195,255,.20)"/><stop offset="1" stop-color="rgba(150,195,255,0)"/>
       </radialGradient>
-      <linearGradient id="helm" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0" stop-color="#080b12"/><stop offset=".6" stop-color="#03050a"/><stop offset="1" stop-color="#010205"/>
-      </linearGradient>
     </defs>
-    <path id="cpVisorPath" fill="url(#helm)" fill-rule="evenodd"/>
-    <path id="cpVisorRim2" fill="none" stroke="rgba(255,196,110,.16)" stroke-width="6"/>
-    <path id="cpVisorRim" fill="none" stroke="rgba(190,214,248,.34)" stroke-width="1.6"/>
+    <path id="cpVisorPath" fill="#03050a" fill-rule="evenodd" filter="url(#visSoft)"/>
+    <path id="cpVisorRim" fill="none" stroke="rgba(158,188,232,.20)" stroke-width="3" filter="url(#visSoft2)"/>
+    <ellipse id="cpNose" fill="url(#noseG)"/>
     <g clip-path="url(#visClip)">
-      <rect class="rf" id="rf1" fill="url(#rfA)"/>
-      <rect class="rf" id="rf2" fill="url(#rfB)"/>
+      <g id="rfRot">
+        <rect class="rf" id="rf1" fill="url(#rfA)"/>
+        <rect class="rf" id="rf2" fill="url(#rfB)"/>
+      </g>
       <rect id="rf3" fill="url(#rfC)"/>
+      <ellipse id="cpFog" fill="url(#fogG)"/>
     </g>
   </svg>
   <div id="cpExit">Click to return outside</div>
@@ -355,12 +376,12 @@ try {
 renderer.setPixelRatio(Math.min(devicePixelRatio || 1, small ? 1.6 : 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.02;
+renderer.toneMappingExposure = 0.94;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x02030a);
-scene.fog = new THREE.FogExp2(0x2c4a80, 0.0);
+scene.fog = new THREE.FogExp2(0x1a2334, 0.0);
 
 const camera = new THREE.PerspectiveCamera(46, innerWidth / innerHeight, 0.5, 9000);
 
@@ -368,7 +389,8 @@ const camera = new THREE.PerspectiveCamera(46, innerWidth / innerHeight, 0.5, 90
 const RE = 100;                                  // Earth radius
 const RM = 27;                                   // Moon radius
 const M  = new THREE.Vector3(170, 640, -90);     // Moon centre
-const PAD = new THREE.Vector3(0, RE, 0);         // launch pad on Earth
+const PAD = new THREE.Vector3(0, RE, 0);         // Bodenpunkt der Startanlage
+const LH  = 6.4;                                 // Deckhoehe des Launch Mount
 const RO = 44;                                   // lunar orbit radius
 const e2 = new THREE.Vector3(0.27, 0.95, -0.17).normalize();               // approach direction = orbit tangent at entry
 const e1 = new THREE.Vector3().crossVectors(e2, new THREE.Vector3(0, 0, 1)).normalize(); // orbit radial at entry
@@ -378,8 +400,8 @@ const T_ORBIT = 0.72;                            // progress at which orbit begi
 
 // transfer trajectory (Catmull-Rom)
 const pts = [
-  PAD.clone().add(new THREE.Vector3(0, -8, 0)),
-  PAD.clone(),
+  PAD.clone().add(new THREE.Vector3(0, LH - 8, 0)),
+  PAD.clone().add(new THREE.Vector3(0, LH, 0)),
   new THREE.Vector3(0, 126, 0),
   new THREE.Vector3(14, 182, -6),
   new THREE.Vector3(58, 292, -25),
@@ -392,30 +414,43 @@ const path = new THREE.CatmullRomCurve3(pts.slice(1, 8), false, 'centripetal', 0
 
 // ---------- lights ----------
 const SUN = new THREE.Vector3(-0.5, 0.16, 1.0).normalize();
-const sun = new THREE.DirectionalLight(0xfff1dc, 2.4);
+const sun = new THREE.DirectionalLight(0xfff1dc, 2.05);
 sun.position.copy(SUN).multiplyScalar(2000);
 scene.add(sun);
-scene.add(new THREE.HemisphereLight(0x8fb2ff, 0x0a0c14, 0.22));
+const hemi = new THREE.HemisphereLight(0x9dbcff, 0x120f0c, 0.30); scene.add(hemi);
 const engineLight = new THREE.PointLight(0xffa040, 0, 90, 1.6);
 scene.add(engineLight);
-const fill = new THREE.DirectionalLight(0xbfd0ff, 0.55);
+const fill = new THREE.DirectionalLight(0xbfd0ff, 0.55); fill.userData.base = 0.55;
 scene.add(fill); scene.add(fill.target);
 
 // ---------- textures ----------
 const tl = new THREE.TextureLoader();
-const tex = (n, srgb = true) => { const t = tl.load(n); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy()); return t; };
-const earthMap = tex('textures/earth_atmos_2048.jpg');
+const MAXA = renderer.capabilities.getMaxAnisotropy();
+const tex = (n, srgb = true) => { const t = tl.load(n); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = Math.min(16, MAXA); return t; };
+// Quellen: NASA Blue Marble Next Generation (Tag), Black Marble 2012 (Nacht),
+// MODIS Wolken-Komposit, LROC-Farbmosaik + LOLA-Hoehenmodell (Mond),
+// NASA SVS Deep Star Map 2020 (Gaia/Tycho) — alles Public Domain.
+// Erst 2K fuer den schnellen ersten Frame, danach schiebt hires() die Originale nach.
+const earthMap = tex('textures/earth_day_2k.jpg');
 const earthNormal = tex('textures/earth_normal_2048.jpg', false);
 const earthSpec = tex('textures/earth_specular_2048.jpg', false);
-const earthLights = tex('textures/earth_lights_2048.png');
-const cloudsMap = tex('textures/earth_clouds_1024.png');
-const moonMap = tex('textures/moon_1024.jpg');
+const earthLights = tex('textures/earth_night_2k.jpg');
+const cloudsMap = tex('textures/earth_clouds_2k.jpg', false);
+const moonMap = tex('textures/moon_color_2k.jpg');
+const moonBump = tex('textures/moon_bump_2k.jpg', false);
+
+// echter Sternhimmel als Hintergrund — landet damit auch in jeder Hull-Spiegelung
+const starMap = tex('textures/starmap_2k.jpg');
+starMap.mapping = THREE.EquirectangularReflectionMapping;
+scene.background = starMap;
+scene.backgroundIntensity = 0.0;
+scene.backgroundRotation = new THREE.Euler(0.32, 2.1, 0.18);
 
 // ---------- Earth ----------
 const earthMat = new THREE.MeshPhongMaterial({
-  map: earthMap, normalMap: earthNormal, normalScale: new THREE.Vector2(0.9, 0.9),
-  specularMap: earthSpec, specular: new THREE.Color(0x3a4a5a), shininess: 18,
-  emissiveMap: earthLights, emissive: new THREE.Color(0xffd9a0), emissiveIntensity: 1.1,
+  map: earthMap, normalMap: earthNormal, normalScale: new THREE.Vector2(1.15, 1.15),
+  specularMap: earthSpec, specular: new THREE.Color(0x44586c), shininess: 26,
+  emissiveMap: earthLights, emissive: new THREE.Color(0xffcf94), emissiveIntensity: 1.45,
 });
 const sunView = new THREE.Vector3();
 earthMat.onBeforeCompile = (sh) => {
@@ -425,12 +460,12 @@ earthMat.onBeforeCompile = (sh) => {
     .replace('#include <emissivemap_fragment>',
       '#include <emissivemap_fragment>\n float ndl = dot(normalize(vNormal), uSunView);\n totalEmissiveRadiance *= smoothstep(0.12, -0.18, ndl);');
 };
-const earth = new THREE.Mesh(new THREE.SphereGeometry(RE, 160, 120), earthMat);
+const earth = new THREE.Mesh(new THREE.SphereGeometry(RE, 220, 160), earthMat);
 earth.rotation.y = 2.35; // put the sunlit ocean/continents where the camera looks
 scene.add(earth);
 
-const clouds = new THREE.Mesh(new THREE.SphereGeometry(RE + 1.2, 128, 96),
-  new THREE.MeshLambertMaterial({ map: cloudsMap, transparent: true, opacity: 0.85, depthWrite: false }));
+const clouds = new THREE.Mesh(new THREE.SphereGeometry(RE + 1.15, 160, 120),
+  new THREE.MeshLambertMaterial({ color: 0xf4f8ff, alphaMap: cloudsMap, transparent: true, opacity: 0.9, depthWrite: false }));
 clouds.rotation.y = 1.1;
 scene.add(clouds);
 
@@ -457,7 +492,7 @@ const atmo2 = new THREE.Mesh(new THREE.SphereGeometry(RE * 1.13, 96, 72), new TH
 scene.add(atmo2);
 
 // ---------- Moon ----------
-const moon = new THREE.Mesh(new THREE.SphereGeometry(RM, 96, 72), new THREE.MeshStandardMaterial({ map: moonMap, roughness: 1, metalness: 0 }));
+const moon = new THREE.Mesh(new THREE.SphereGeometry(RM, 160, 120), new THREE.MeshStandardMaterial({ map: moonMap, bumpMap: moonBump, bumpScale: 0.32, roughness: 0.98, metalness: 0 }));
 moon.position.copy(M);
 moon.rotation.y = 1.4;
 scene.add(moon);
@@ -511,8 +546,8 @@ function makeStars(count, radius, sizeMin, sizeMax, band) {
   p.frustumCulled = false;
   return p;
 }
-const stars = makeStars(small ? 2600 : 5200, 3600, 1.0, 3.4, false);
-const stars2 = makeStars(small ? 5000 : 12000, 3800, 0.6, 1.4, true);
+const stars = makeStars(small ? 900 : 1800, 3600, 1.1, 3.6, false);   // Funkeln vor der NASA-Karte
+const stars2 = makeStars(small ? 400 : 900, 3800, 0.6, 1.2, true);
 stars2.material.uniforms.uAlpha.value = 0.55;
 scene.add(stars, stars2);
 
@@ -537,47 +572,120 @@ const cubeRT = new THREE.WebGLCubeRenderTarget(small ? 128 : 256, { generateMipm
 const cubeCam = new THREE.CubeCamera(0.8, 7000, cubeRT);
 scene.add(cubeCam);
 
-// procedural stainless surface: circumferential brush grain + ring welds every barrel section
+// Hoehe -> Normalmap (Sobel). Damit bekommen Schweissnaehte, Blechstoesse und Kacheln echte Kanten.
+function normalFromHeight(src, strength) {
+  const S = src.width, c = document.createElement('canvas'); c.width = c.height = S;
+  const g = c.getContext('2d'), sg = src.getContext('2d');
+  const h = sg.getImageData(0, 0, S, S).data, out = g.createImageData(S, S), o = out.data;
+  const at = (x, y) => h[(((y + S) % S) * S + ((x + S) % S)) * 4] / 255;
+  for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+    const dx = (at(x + 1, y) - at(x - 1, y)) * strength;
+    const dy = (at(x, y + 1) - at(x, y - 1)) * strength;
+    const l = Math.hypot(dx, dy, 1), i = (y * S + x) * 4;
+    o[i] = (-dx / l * 0.5 + 0.5) * 255; o[i + 1] = (-dy / l * 0.5 + 0.5) * 255; o[i + 2] = (1 / l * 0.5 + 0.5) * 255; o[i + 3] = 255;
+  }
+  g.putImageData(out, 0, 0);
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = Math.min(16, MAXA); return t;
+}
+
+// Edelstahl 304L wie an der echten Huelle: umlaufender Walzschliff, Ringnaehte je Barrel-Segment,
+// vertikale Blechstoesse, leichte Beulen — als Rauheits- UND Normalmap.
+const STEEL_S = small ? 1024 : 2048;
+const steelHeight = document.createElement('canvas'); steelHeight.width = steelHeight.height = STEEL_S;
 const steelSurface = (() => {
-  const c = document.createElement('canvas'); c.width = c.height = 512;
-  const g = c.getContext('2d');
-  g.fillStyle = '#c4c4c4'; g.fillRect(0, 0, 512, 512);
-  for (let i = 0; i < 5200; i++) {
-    const y = Math.random() * 512, x = Math.random() * 512, w = 18 + Math.random() * 200;
-    const v = 150 + Math.random() * 86;
-    g.strokeStyle = `rgba(${v},${v},${v},.5)`; g.lineWidth = 0.6 + Math.random() * 0.9;
+  const S = STEEL_S, c = document.createElement('canvas'); c.width = c.height = S;
+  const g = c.getContext('2d'), hg = steelHeight.getContext('2d');
+  g.fillStyle = '#b8b8b8'; g.fillRect(0, 0, S, S);
+  hg.fillStyle = '#808080'; hg.fillRect(0, 0, S, S);
+  // Walzschliff: sehr feine horizontale Streifen (umlaufend)
+  for (let i = 0; i < S * 26; i++) {
+    const y = Math.random() * S, x = Math.random() * S, w = 30 + Math.random() * 520;
+    const v = 150 + Math.random() * 92;
+    g.strokeStyle = `rgba(${v},${v},${v},.34)`; g.lineWidth = 0.5 + Math.random() * 1.1;
     g.beginPath(); g.moveTo(x, y); g.lineTo(x + w, y); g.stroke();
   }
-  for (let y = 0; y <= 512; y += 64) {           // ring welds between barrel sections
-    const gr = g.createLinearGradient(0, y - 6, 0, y + 6);
-    gr.addColorStop(0, 'rgba(240,240,240,0)'); gr.addColorStop(0.5, 'rgba(244,244,244,.85)'); gr.addColorStop(1, 'rgba(240,240,240,0)');
-    g.fillStyle = gr; g.fillRect(0, y - 6, 512, 12);
+  // sanfte Beulen/Welligkeit im Blech
+  for (let i = 0; i < 260; i++) {
+    const x = Math.random() * S, y = Math.random() * S, r = S * (0.02 + Math.random() * 0.07);
+    const gr = hg.createRadialGradient(x, y, 0, x, y, r);
+    const up = Math.random() < 0.5;
+    gr.addColorStop(0, up ? 'rgba(150,150,150,.5)' : 'rgba(110,110,110,.5)'); gr.addColorStop(1, 'rgba(128,128,128,0)');
+    hg.fillStyle = gr; hg.beginPath(); hg.arc(x, y, r, 0, 6.283); hg.fill();
+  }
+  const RING = S / 8;                                   // Ringnaht je Barrel-Segment
+  for (let y = 0; y <= S; y += RING) {
+    const gr = g.createLinearGradient(0, y - RING * 0.06, 0, y + RING * 0.06);
+    gr.addColorStop(0, 'rgba(210,210,210,0)'); gr.addColorStop(0.45, 'rgba(246,246,246,.9)');
+    gr.addColorStop(0.55, 'rgba(150,150,150,.85)'); gr.addColorStop(1, 'rgba(210,210,210,0)');
+    g.fillStyle = gr; g.fillRect(0, y - RING * 0.06, S, RING * 0.12);
+    // Naht-Raupe als Hoehe, leicht unregelmaessig
+    hg.lineWidth = Math.max(2, S / 340); hg.strokeStyle = 'rgba(196,196,196,.95)';
+    hg.beginPath();
+    for (let x = 0; x <= S; x += 6) hg.lineTo(x, y + Math.sin(x * 0.07) * (S / 900) + (Math.random() - 0.5) * (S / 700));
+    hg.stroke();
+    hg.strokeStyle = 'rgba(96,96,96,.5)'; hg.lineWidth = Math.max(1, S / 700);
+    hg.beginPath(); hg.moveTo(0, y + S / 300); hg.lineTo(S, y + S / 300); hg.stroke();
+  }
+  for (let i = 0; i < 4; i++) {                          // vertikale Blechstoesse
+    const x = (i + 0.5) * S / 4;
+    g.fillStyle = 'rgba(168,168,168,.5)'; g.fillRect(x - 1, 0, 2, S);
+    hg.strokeStyle = 'rgba(104,104,104,.8)'; hg.lineWidth = Math.max(1.5, S / 620);
+    hg.beginPath(); hg.moveTo(x, 0); hg.lineTo(x, S); hg.stroke();
   }
   const t = new THREE.CanvasTexture(c);
   t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(3, 1);
-  t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  t.anisotropy = Math.min(16, MAXA);
   return t;
 })();
+const steelNormal = normalFromHeight(steelHeight, small ? 1.6 : 2.4);
+steelNormal.repeat.set(3, 1);
 
-const chrome = new THREE.MeshStandardMaterial({
-  color: 0xeef2f8, metalness: 1.0, roughness: 0.26,
-  roughnessMap: steelSurface, bumpMap: steelSurface, bumpScale: 0.02,
-  envMap: cubeRT.texture, envMapIntensity: 2.0,
+const chrome = new THREE.MeshPhysicalMaterial({
+  color: 0xe9eef6, metalness: 1.0, roughness: 0.37,
+  roughnessMap: steelSurface, normalMap: steelNormal, normalScale: new THREE.Vector2(0.55, 0.55),
+  envMap: cubeRT.texture, envMapIntensity: 1.55,
+  anisotropy: 0.32, anisotropyRotation: Math.PI / 2,   // Schliff laeuft umlaufend, nicht laengs
 });
-const chromeDark = new THREE.MeshStandardMaterial({
-  color: 0x8d959f, metalness: 1.0, roughness: 0.42,
-  roughnessMap: steelSurface, envMap: cubeRT.texture, envMapIntensity: 1.3, side: THREE.DoubleSide,
+const chromeDark = new THREE.MeshPhysicalMaterial({
+  color: 0x8b939d, metalness: 1.0, roughness: 0.46,
+  roughnessMap: steelSurface, normalMap: steelNormal, normalScale: new THREE.Vector2(0.4, 0.4),
+  envMap: cubeRT.texture, envMapIntensity: 1.25, side: THREE.DoubleSide,
+  anisotropy: 0.4, anisotropyRotation: Math.PI / 2,
 });
-// windward heat-shield tiles
+// Hitzeschild: echte Sechseck-Kacheln mit Fugen, Kantenfase und Helligkeitsstreuung
+const tileHeight = document.createElement('canvas');
 const tileTex = (() => {
-  const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d');
-  g.fillStyle = '#0d0f13'; g.fillRect(0, 0, 256, 256);
-  for (let y = 0; y < 256; y += 16) for (let x = 0; x < 256; x += 16) {
-    const v = 14 + Math.random() * 16; g.fillStyle = `rgb(${v},${v + 1},${v + 3})`; g.fillRect(x + 1, y + 1, 14, 14);
+  const S = small ? 512 : 1024, c = document.createElement('canvas'); c.width = c.height = S;
+  tileHeight.width = tileHeight.height = S;
+  const g = c.getContext('2d'), hg = tileHeight.getContext('2d');
+  g.fillStyle = '#050608'; g.fillRect(0, 0, S, S);
+  hg.fillStyle = '#2a2a2a'; hg.fillRect(0, 0, S, S);
+  const COLS = 22, r = S / COLS / 2 / Math.cos(Math.PI / 6), dx = Math.sqrt(3) * r, dy = 1.5 * r;
+  const hexPath = (ctx, cx, cy, rr) => {
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) { const a = Math.PI / 180 * (60 * i - 30); const x = cx + rr * Math.cos(a), y = cy + rr * Math.sin(a); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.closePath();
+  };
+  for (let row = -1; row * dy < S + dy; row++) {
+    for (let col = -1; col * dx < S + dx; col++) {
+      const cx = col * dx + (row % 2 ? dx / 2 : 0), cy = row * dy;
+      const v = 16 + Math.random() * 13;                       // Kacheln streuen leicht
+      g.fillStyle = `rgb(${v},${v + 1},${v + 3})`;
+      hexPath(g, cx, cy, r * 0.93); g.fill();
+      g.strokeStyle = `rgba(${v + 18},${v + 19},${v + 22},.55)`; g.lineWidth = 1; g.stroke();
+      hg.fillStyle = '#c8c8c8'; hexPath(hg, cx, cy, r * 0.9); hg.fill();
+      hg.fillStyle = '#e0e0e0'; hexPath(hg, cx, cy, r * 0.72); hg.fill();
+    }
   }
-  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(9, 9); return t;
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(4, 4);
+  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = Math.min(16, MAXA); return t;
 })();
-const tileMat = new THREE.MeshStandardMaterial({ color: 0x1a1d22, map: tileTex, roughness: 0.92, metalness: 0.05 });
+const tileNormal = normalFromHeight(tileHeight, 2.2); tileNormal.repeat.set(4, 4);
+const tileMat = new THREE.MeshStandardMaterial({
+  color: 0x424a54, map: tileTex, normalMap: tileNormal, normalScale: new THREE.Vector2(0.9, 0.9),
+  roughness: 0.9, metalness: 0.06, envMap: cubeRT.texture, envMapIntensity: 0.45,
+});
+
 const glassMat = new THREE.MeshStandardMaterial({
   color: 0x05080e, metalness: 0.7, roughness: 0.16, envMap: cubeRT.texture, envMapIntensity: 0.55,
   emissive: 0x1d3f63, emissiveIntensity: 0.09,
@@ -611,7 +719,7 @@ const R = 1.5;
   for (let i = 0; i <= 28; i++) { const t = i / 28; np.push(new THREE.Vector2(Math.max(0.025, R * Math.pow(1 - t * t, 0.56)), 10.6 + NH * t)); }
   const nose = new THREE.Mesh(new THREE.LatheGeometry(np, 64), chrome); rocket.add(nose);
   // windward tiles (opposite the camera side)
-  const tiles = new THREE.Mesh(new THREE.CylinderGeometry(R + 0.035, R + 0.035, 10.5, 64, 1, true, Math.PI - 1.45, 2.9), tileMat);
+  const tiles = new THREE.Mesh(new THREE.CylinderGeometry(R + 0.035, R + 0.035, 10.5, 96, 1, true, Math.PI - 1.62, 2.7), tileMat);
   tiles.position.y = 5.3; rocket.add(tiles);
   // hull stencil on the polished side
   const decal = new THREE.Mesh(new THREE.CylinderGeometry(R + 0.012, R + 0.012, 6.2, 48, 1, true, -0.30, 0.60), decalMat);
@@ -703,30 +811,232 @@ const smoke = new THREE.Points(smokeGeo, new THREE.ShaderMaterial({
 smoke.frustumCulled = false; scene.add(smoke);
 let sHead = 0;
 
-// launch pad
+// ---------- Startanlage: Orbital Launch Mount + Fangturm (Starbase-Stil) ----------
+// Massstab: 1 Einheit ~ 3 m. Rakete steht auf dem Deck des Launch Mount (y = LH).
 const pad = new THREE.Group();
-{
-  const plate = new THREE.Mesh(new THREE.CylinderGeometry(6.5, 7.2, 0.5, 48), new THREE.MeshStandardMaterial({ color: 0x1a1d23, roughness: 0.8, metalness: 0.2 }));
-  plate.position.y = -0.25; pad.add(plate);
-  const ringM = new THREE.Mesh(new THREE.TorusGeometry(6.2, 0.06, 8, 64), new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 0.6, roughness: 1 }));
-  ringM.userData.noReflect = true;
-  ringM.rotation.x = Math.PI / 2; ringM.position.y = 0.02; pad.add(ringM);
-  const towerM = new THREE.MeshStandardMaterial({ color: 0x2a2f38, roughness: 0.6, metalness: 0.5 });
-  const tower = new THREE.Mesh(new THREE.BoxGeometry(0.7, 15, 0.7), towerM); tower.position.set(-4.2, 7.5, -1.5); pad.add(tower);
-  for (let i = 0; i < 4; i++) { const arm = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.16, 0.16), towerM); arm.position.set(-2.9, 3 + i * 3.2, -1.5); pad.add(arm); }
-  const lampM = new THREE.MeshStandardMaterial({ color: 0xffe0b0, emissive: 0xffc070, emissiveIntensity: 2.2 });
-  [[5.2, 0, 3.4], [-5.2, 0, 3.4], [5.2, 0, -3.4], [-4.2, 15.2, -1.5]].forEach(([x, y, z]) => { const l = new THREE.Mesh(new THREE.SphereGeometry(0.16, 10, 8), lampM); l.position.set(x, y + 0.2, z); l.userData.noReflect = true; pad.add(l); });
-  const gnd = new THREE.Mesh(new THREE.CircleGeometry(40, 64), new THREE.MeshStandardMaterial({ color: 0x141a24, roughness: 1, transparent: true, opacity: 0.4, depthWrite: false }));
-  gnd.rotation.x = -Math.PI / 2; gnd.position.y = 0.01; pad.add(gnd);
+const padDetail = small ? 0 : 1;
+
+// Oberflaechen
+function noiseCanvas(size, base, spots, fn) {
+  const c = document.createElement('canvas'); c.width = c.height = size; const g = c.getContext('2d');
+  g.fillStyle = base; g.fillRect(0, 0, size, size);
+  for (let i = 0; i < spots; i++) fn(g, Math.random() * size, Math.random() * size, size);
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = Math.min(16, MAXA); return t;
 }
+// Beton: Zuschlagkorn, Verfaerbungen, Dehnungsfugen
+const concreteTex = (() => {
+  const S = 1024, c = document.createElement('canvas'); c.width = c.height = S; const g = c.getContext('2d');
+  g.fillStyle = '#6a6b68'; g.fillRect(0, 0, S, S);
+  for (let i = 0; i < 26000; i++) {
+    const v = 78 + Math.random() * 62, r = 0.5 + Math.random() * 2.2;
+    g.fillStyle = `rgba(${v},${v - 1},${v - 4},${0.15 + Math.random() * 0.5})`;
+    g.beginPath(); g.arc(Math.random() * S, Math.random() * S, r, 0, 6.283); g.fill();
+  }
+  for (let i = 0; i < 90; i++) {                      // Wasser-/Russflecken
+    const x = Math.random() * S, y = Math.random() * S, r = 20 + Math.random() * 120;
+    const gr = g.createRadialGradient(x, y, 0, x, y, r);
+    const dark = Math.random() < 0.6;
+    gr.addColorStop(0, dark ? 'rgba(40,40,42,.30)' : 'rgba(150,148,140,.20)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, 6.283); g.fill();
+  }
+  g.strokeStyle = 'rgba(38,38,40,.55)'; g.lineWidth = 3;                 // Fugenraster
+  for (let i = 0; i <= 4; i++) { const q = i * S / 4; g.beginPath(); g.moveTo(q, 0); g.lineTo(q, S); g.moveTo(0, q); g.lineTo(S, q); g.stroke(); }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = Math.min(16, MAXA); return t;
+})();
+const sandTex = noiseCanvas(512, '#7d7360', 9000, (g, x, y, S) => {
+  const v = 96 + Math.random() * 60; g.fillStyle = `rgba(${v},${v - 8},${v - 26},${0.1 + Math.random() * 0.35})`;
+  g.fillRect(x, y, 1 + Math.random() * 3, 1 + Math.random() * 3);
+});
+sandTex.colorSpace = THREE.SRGBColorSpace;
+
+const matConcrete = new THREE.MeshStandardMaterial({ map: concreteTex, color: 0x7c8185, roughness: 0.94, metalness: 0.04 });
+const matGround = new THREE.MeshStandardMaterial({ map: sandTex, color: 0x6b6558, roughness: 1.0, metalness: 0.0 });
+const matSteel = new THREE.MeshStandardMaterial({ color: 0x4a5058, roughness: 0.52, metalness: 0.86, envMap: cubeRT.texture, envMapIntensity: 0.65 });
+const matSteelDark = new THREE.MeshStandardMaterial({ color: 0x23272d, roughness: 0.62, metalness: 0.8, envMap: cubeRT.texture, envMapIntensity: 0.45 });
+const matSoot = new THREE.MeshStandardMaterial({ color: 0x14161a, roughness: 0.88, metalness: 0.35 });
+const matTank = new THREE.MeshStandardMaterial({ color: 0x9aa3ad, roughness: 0.34, metalness: 0.85, envMap: cubeRT.texture, envMapIntensity: 0.9 });
+const matLamp = new THREE.MeshStandardMaterial({ color: 0xfff0d4, emissive: 0xffcf8a, emissiveIntensity: 2.6, roughness: 1 });
+const matBeacon = new THREE.MeshStandardMaterial({ color: 0xff3b30, emissive: 0xff2418, emissiveIntensity: 3.2, roughness: 1 });
+
+// Boden und Betonschuerze sind echte Kugelkappen auf dem Erdradius — eine flache Scheibe
+// (oder eine Scheibe mit nur Mittel- und Randvertex) taucht zwischendrin unter die Kugel und verschwindet.
+function capGeo(r, capR, seg, uvScale) {
+  const phi = Math.asin(Math.min(0.985, capR / r));
+  const g = new THREE.SphereGeometry(r, seg, Math.max(10, seg >> 1), 0, Math.PI * 2, 0, phi);
+  const pos = g.attributes.position, uv = g.attributes.uv;
+  for (let i = 0; i < pos.count; i++) uv.setXY(i, pos.getX(i) / uvScale + 0.5, pos.getZ(i) / uvScale + 0.5);
+  uv.needsUpdate = true; return g;
+}
+{
+  const gGeo = capGeo(RE + 0.05, 94, small ? 96 : 160, 14);
+  { // Randabfall als Vertex-Alpha, sonst steht eine harte Kante gegen die Erdtextur
+    const pos = gGeo.attributes.position, col = new Float32Array(pos.count * 4);
+    for (let i = 0; i < pos.count; i++) {
+      const r = Math.hypot(pos.getX(i), pos.getZ(i));
+      const a = 1 - THREE.MathUtils.smoothstep(r, 62, 93);
+      col.set([1, 1, 1, a], i * 4);
+    }
+    gGeo.setAttribute('color', new THREE.BufferAttribute(col, 4));
+    matGround.vertexColors = true; matGround.transparent = true; matGround.depthWrite = true;
+  }
+  const ground = new THREE.Mesh(gGeo, matGround);
+  ground.position.y = -RE; pad.add(ground);
+  const apron = new THREE.Mesh(capGeo(RE + 0.16, 23.5, 96, 11), matConcrete);
+  apron.position.y = -RE; pad.add(apron);
+  // Brandnarbe unter dem Mount
+  const scorch = new THREE.Mesh(capGeo(RE + 0.22, 9.5, 64, 20), new THREE.MeshStandardMaterial({
+    color: 0x2a2622, roughness: 1, metalness: 0, transparent: true, opacity: 0.72, depthWrite: false }));
+  scorch.position.y = -RE; pad.add(scorch);
+}
+
+// --- Orbital Launch Mount: sechs Beine, Hexagon-Deck, Flammenloch, Halteklemmen ---
+const LEGR = 4.15;
+{
+  for (let i = 0; i < 6; i++) {
+    const a = i * Math.PI / 3 + Math.PI / 6;
+    const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.52, 0.74, LH, 14), matSteel);
+    leg.position.set(Math.cos(a) * LEGR, LH / 2, Math.sin(a) * LEGR); pad.add(leg);
+    const foot = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.15, 0.45, 16), matSteelDark);
+    foot.position.set(Math.cos(a) * LEGR, 0.22, Math.sin(a) * LEGR); pad.add(foot);
+    if (padDetail) {                                   // Diagonalverstrebung zwischen den Beinen
+      const b = (i + 1) * Math.PI / 3 + Math.PI / 6;
+      const p1 = new THREE.Vector3(Math.cos(a) * LEGR, LH * 0.20, Math.sin(a) * LEGR);
+      const p2 = new THREE.Vector3(Math.cos(b) * LEGR, LH * 0.78, Math.sin(b) * LEGR);
+      for (const [q1, q2] of [[p1, p2], [new THREE.Vector3(p1.x, p2.y, p1.z), new THREE.Vector3(p2.x, p1.y, p2.z)]]) {
+        const d = new THREE.Vector3().subVectors(q2, q1);
+        const br = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, d.length(), 8), matSteel);
+        br.position.copy(q1).addScaledVector(d, 0.5);
+        br.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().normalize());
+        pad.add(br);
+      }
+    }
+  }
+  // Deck: Hexagon mit rundem Flammenloch
+  const hex = new THREE.Shape();
+  for (let i = 0; i <= 6; i++) { const a = i * Math.PI / 3; const x = Math.cos(a) * 5.5, y = Math.sin(a) * 5.5; i ? hex.lineTo(x, y) : hex.moveTo(x, y); }
+  const hole = new THREE.Path(); hole.absarc(0, 0, 2.25, 0, Math.PI * 2, true); hex.holes.push(hole);
+  const deck = new THREE.Mesh(new THREE.ExtrudeGeometry(hex, { depth: 1.05, bevelEnabled: false, curveSegments: 40 }), matSteel);
+  deck.rotation.x = -Math.PI / 2; deck.position.y = LH; pad.add(deck);
+  // Unterseite russgeschwaerzt
+  const under = new THREE.Mesh(new THREE.RingGeometry(2.25, 5.4, 48), matSoot);
+  under.rotation.x = Math.PI / 2; under.position.y = LH - 1.06; pad.add(under);
+  // wassergekuehlte Stahlplatte unter dem Loch ("shower head")
+  const plate = new THREE.Mesh(new THREE.CylinderGeometry(2.9, 2.9, 0.3, 48), matSoot);
+  plate.position.y = LH - 2.5; pad.add(plate);
+  const pring = new THREE.Mesh(new THREE.TorusGeometry(2.9, 0.09, 8, 48), matSteel);
+  pring.rotation.x = Math.PI / 2; pring.position.y = LH - 2.35; pad.add(pring);
+  // 20 Halteklemmen um das Loch
+  const clampG = new THREE.BoxGeometry(0.34, 0.62, 0.5);
+  for (let i = 0; i < 20; i++) {
+    const a = i * Math.PI * 2 / 20;
+    const cl = new THREE.Mesh(clampG, matSteelDark);
+    cl.position.set(Math.cos(a) * 2.62, LH + 0.3, Math.sin(a) * 2.62); cl.rotation.y = -a; pad.add(cl);
+  }
+  // Gelaender
+  const rail = new THREE.Mesh(new THREE.TorusGeometry(5.35, 0.045, 6, 64), matSteel);
+  rail.rotation.x = Math.PI / 2; rail.position.y = LH + 1.15; pad.add(rail);
+  if (padDetail) for (let i = 0; i < 24; i++) {
+    const a = i * Math.PI * 2 / 24;
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.1, 6), matSteel);
+    post.position.set(Math.cos(a) * 5.35, LH + 0.6, Math.sin(a) * 5.35); pad.add(post);
+  }
+}
+
+// --- Fangturm ("Mechazilla"): Gitterturm mit Chopstick-Armen ---
+const TOWER = new THREE.Vector3(8.6, 0, -5.4);
+{
+  const SEC = 3.3, N = padDetail ? 8 : 6, W = 1.25;   // halbe Kantenlaenge
+  const colG = new THREE.BoxGeometry(0.26, SEC, 0.26);
+  const beamG = new THREE.BoxGeometry(W * 2, 0.16, 0.16);
+  const braceLen = Math.hypot(W * 2, SEC) ;
+  const braceG = new THREE.BoxGeometry(0.12, braceLen, 0.12);
+  const corners = [[-W, -W], [W, -W], [W, W], [-W, W]];
+  for (let s = 0; s < N; s++) {
+    const y0 = s * SEC;
+    corners.forEach(([cx, cz]) => { const c = new THREE.Mesh(colG, matSteelDark); c.position.set(TOWER.x + cx, y0 + SEC / 2, TOWER.z + cz); pad.add(c); });
+    for (let f = 0; f < 4; f++) {                       // Riegel + Diagonalen je Seite
+      const a = f * Math.PI / 2;
+      const ox = Math.cos(a) * W, oz = Math.sin(a) * W;
+      const bm = new THREE.Mesh(beamG, matSteelDark);
+      bm.position.set(TOWER.x + ox, y0 + SEC, TOWER.z + oz); bm.rotation.y = -a; pad.add(bm);
+      if (padDetail) {
+        const br = new THREE.Mesh(braceG, matSteelDark);
+        br.position.set(TOWER.x + ox, y0 + SEC / 2, TOWER.z + oz);
+        br.rotation.y = -a; br.rotation.z = (s % 2 ? 1 : -1) * Math.atan2(W * 2, SEC);
+        pad.add(br);
+      }
+    }
+  }
+  const TH = N * SEC;
+  // Aufzugsschacht + Kopf
+  const shaft = new THREE.Mesh(new THREE.BoxGeometry(0.9, TH, 0.9), matSteel);
+  shaft.position.set(TOWER.x - W - 0.35, TH / 2, TOWER.z); pad.add(shaft);
+  const head = new THREE.Mesh(new THREE.BoxGeometry(W * 2.4, 1.1, W * 2.4), matSteel);
+  head.position.set(TOWER.x, TH + 0.55, TOWER.z); pad.add(head);
+  const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.11, 5.5, 8), matSteel);
+  mast.position.set(TOWER.x, TH + 3.3, TOWER.z); pad.add(mast);
+  [TH + 1.4, TH + 6.0].forEach(y => { const b = new THREE.Mesh(new THREE.SphereGeometry(0.13, 10, 8), matBeacon); b.position.set(TOWER.x, y, TOWER.z); b.userData.noReflect = true; pad.add(b); });
+
+  // Chopsticks: Schlitten + zwei Arme, die die Rakete umfassen
+  const carY = LH + 6.4;
+  const car = new THREE.Mesh(new THREE.BoxGeometry(W * 2.5, 1.5, W * 2.5), matSteel);
+  car.position.set(TOWER.x, carY, TOWER.z); pad.add(car);
+  [-2.1, 2.1].forEach(dz => {
+    const armLen = 5.2;
+    const arm = new THREE.Mesh(new THREE.BoxGeometry(armLen, 0.55, 0.85), matSteelDark);
+    arm.position.set(TOWER.x - armLen / 2 - 1.0, carY, TOWER.z + dz);
+    arm.rotation.y = dz > 0 ? -0.16 : 0.16; pad.add(arm);
+    const truss = new THREE.Mesh(new THREE.BoxGeometry(armLen * 0.9, 0.16, 0.16), matSteel);
+    truss.position.set(TOWER.x - armLen / 2 - 1.0, carY + 0.5, TOWER.z + dz);
+    truss.rotation.y = arm.rotation.y; pad.add(truss);
+    const tip = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.75, 1.2), matSteelDark);
+    tip.position.set(TOWER.x - armLen - 1.35, carY, TOWER.z + dz * 0.78); pad.add(tip);
+  });
+  // Quick-Disconnect-Arm zur Rakete
+  const qd = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.5, 0.8), matSteel);
+  qd.position.set(TOWER.x - 3.4, LH + 2.6, TOWER.z + 2.2); qd.rotation.y = 0.52; pad.add(qd);
+  const qdHead = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.9, 0.9), matSteelDark);
+  qdHead.position.set(1.72, LH + 2.6, 0.5); pad.add(qdHead);
+
+  // Blitzschutzmasten
+  [[-9.5, -7.5], [10.5, 6.0], [-11.0, 6.5]].forEach(([x, z]) => {
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.13, 24, 8), matSteel);
+    m.position.set(x, 12, z); pad.add(m);
+    const b = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 6), matBeacon); b.position.set(x, 24.2, z); b.userData.noReflect = true; pad.add(b);
+  });
+}
+
+// --- Tankfarm + Flutlicht ---
+{
+  const tankG = new THREE.CylinderGeometry(1.15, 1.15, 3.6, 24);
+  const domeG = new THREE.SphereGeometry(1.15, 24, 12, 0, 6.2832, 0, Math.PI / 2);
+  for (let i = 0; i < 7; i++) {
+    const x = -13.5 - (i % 4) * 3.0, z = -8.5 - Math.floor(i / 4) * 3.4;
+    const t = new THREE.Mesh(tankG, matTank); t.position.set(x, 1.8, z); pad.add(t);
+    const d = new THREE.Mesh(domeG, matTank); d.position.set(x, 3.6, z); pad.add(d);
+  }
+  for (let i = 0; i < 3; i++) {                      // liegende Tanks
+    const t = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.85, 5.2, 20), matTank);
+    t.rotation.z = Math.PI / 2; t.position.set(-12 + i * 0.6, 1.1, 4.5 + i * 2.6); pad.add(t);
+  }
+  const floodPos = [[9.2, 6.8], [-8.6, 7.4], [8.4, -8.2], [-9.4, -6.4]];
+  floodPos.forEach(([x, z]) => {
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.1, 5.2, 8), matSteel);
+    m.position.set(x, 2.6, z); pad.add(m);
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.3, 0.22), matLamp);
+    head.position.set(x, 5.3, z); head.lookAt(0, LH + 4, 0); head.userData.noReflect = true; pad.add(head);
+  });
+}
+
 const floods = [];
-[[9, 3.5, 7], [-9, 3.2, 6], [7, 3.0, -8]].forEach(([x, y, z]) => {
-  const l = new THREE.PointLight(0xdfe8ff, 0, 120, 1.25);
+[[9.2, 5.3, 6.8], [-8.6, 5.3, 7.4], [8.4, 5.3, -8.2], [-9.4, 5.3, -6.4], [0, LH + 3, 9]].forEach(([x, y, z]) => {
+  const l = new THREE.PointLight(0xe8eeff, 0, 150, 1.15);
   l.position.set(PAD.x + x, PAD.y + y, PAD.z + z); scene.add(l); floods.push(l);
 });
 pad.position.copy(PAD); scene.add(pad);
 const noReflect = []; scene.traverse(o => { if (o.userData && o.userData.noReflect) noReflect.push(o); });
-const padMats = []; pad.traverse(o => { if (o.isMesh) { o.material = o.material.clone(); o.material.transparent = true; padMats.push([o.material, o.material.opacity]); } });
+const padMats = []; { const seen = new Set(); pad.traverse(o => { if (o.isMesh && o.material && !seen.has(o.material)) { seen.add(o.material); o.material.transparent = true; padMats.push([o.material, o.material.opacity]); } }); }
 
 // intro wireframe (field-scan) — Earth grid + rocket wire, fade out at start
 const wireMat = new THREE.MeshBasicMaterial({ color: 0xa9c6ff, wireframe: true, transparent: true, opacity: 0.0, depthWrite: false, blending: THREE.AdditiveBlending });
@@ -740,10 +1050,315 @@ solidMats.push(decalMat);
 solidMats.forEach(m => { m.transparent = true; m.opacity = 0; });
 clouds.material.opacity = 0;
 
+// ---------- Cockpit in 3D: eigene Render-Ebene mit eigener Near-Plane ----------
+// Der Innenraum ist ~2 m gross, die Welt 400.000 km — beides in einer Szene sprengt den Tiefenpuffer.
+// Deshalb rendert das Cockpit als zweiter Pass mit eigener Kamera (near 0.01) ueber die Weltszene.
+const cockScene = new THREE.Scene();
+const cockCam = new THREE.PerspectiveCamera(46, innerWidth / innerHeight, 0.008, 40);
+const cockRig = new THREE.Group();          // Innenraum, fest im Raketen-Rahmen -> Kopfbewegung ergibt echte Parallaxe
+cockScene.add(cockRig);
+
+// Innenraum-Oberflaeche: lackiertes Blech mit Paneelen, Nieten, Gebrauchsspuren
+const intMaps = (() => {
+  const S = 1024, c = document.createElement('canvas'), h = document.createElement('canvas');
+  c.width = c.height = h.width = h.height = S;
+  const g = c.getContext('2d'), hg = h.getContext('2d');
+  g.fillStyle = '#252b31'; g.fillRect(0, 0, S, S);
+  hg.fillStyle = '#808080'; hg.fillRect(0, 0, S, S);
+  for (let i = 0; i < 40; i++) {                       // Paneelfelder
+    const x = Math.random() * S, y = Math.random() * S, w = 60 + Math.random() * 220, hh = 50 + Math.random() * 180;
+    g.fillStyle = `rgba(${30 + Math.random() * 26},${34 + Math.random() * 26},${40 + Math.random() * 26},.34)`;
+    g.fillRect(x, y, w, hh);
+    g.strokeStyle = 'rgba(18,21,26,.42)'; g.lineWidth = 1.4; g.strokeRect(x, y, w, hh);
+    hg.strokeStyle = 'rgba(96,96,96,.9)'; hg.lineWidth = 3; hg.strokeRect(x, y, w, hh);
+    for (let rx = x + 10; rx < x + w - 6; rx += 26) {   // Nietenreihen
+      [y + 8, y + hh - 8].forEach(ry => {
+        g.fillStyle = 'rgba(150,158,168,.5)'; g.beginPath(); g.arc(rx, ry, 2.0, 0, 6.283); g.fill();
+        hg.fillStyle = 'rgba(178,178,178,.95)'; hg.beginPath(); hg.arc(rx, ry, 2.4, 0, 6.283); hg.fill();
+      });
+    }
+  }
+  for (let i = 0; i < 900; i++) {                      // Kratzer und Staub
+    const x = Math.random() * S, y = Math.random() * S, l = 3 + Math.random() * 26;
+    g.strokeStyle = `rgba(${120 + Math.random() * 90},${128 + Math.random() * 90},${140 + Math.random() * 90},${0.03 + Math.random() * 0.1})`;
+    g.lineWidth = 0.7; g.beginPath(); g.moveTo(x, y); g.lineTo(x + l, y + (Math.random() - 0.5) * 5); g.stroke();
+  }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(2.2, 2.2); t.anisotropy = Math.min(16, MAXA);
+  const n = normalFromHeight(h, 1.5); n.repeat.set(2.2, 2.2);
+  return { map: t, normalMap: n };
+})();
+const matInt = new THREE.MeshStandardMaterial({ ...intMaps, color: 0xaeb6c0, roughness: 0.72, metalness: 0.2,
+  normalScale: new THREE.Vector2(0.85, 0.85), envMap: cubeRT.texture, envMapIntensity: 0.26 });
+const matTrim = new THREE.MeshStandardMaterial({ color: 0x818892, roughness: 0.62, metalness: 0.38, envMap: cubeRT.texture, envMapIntensity: 0.16 });
+const matPad = new THREE.MeshStandardMaterial({ color: 0x1d2229, roughness: 0.95, metalness: 0.02 });
+const matSuit = new THREE.MeshStandardMaterial({ color: 0x7d848d, roughness: 0.9, metalness: 0.03 });
+const matSuitTrim = new THREE.MeshStandardMaterial({ color: 0x1b1e24, roughness: 0.6, metalness: 0.3 });
+const matSeal = new THREE.MeshStandardMaterial({ color: 0x0d0f13, roughness: 0.98, metalness: 0.0 });
+const matStrap = new THREE.MeshStandardMaterial({ color: 0x2b3038, roughness: 0.92, metalness: 0.02 });
+const matBtnG = new THREE.MeshStandardMaterial({ color: 0x0d1a12, emissive: 0x36e07a, emissiveIntensity: 2.4, roughness: 0.6 });
+const matBtnA = new THREE.MeshStandardMaterial({ color: 0x1a1206, emissive: 0xffb347, emissiveIntensity: 2.4, roughness: 0.6 });
+// Scheibe: Innenraum spiegelt sich schwach im Glas — Displayschein von unten, zwei
+// Streiflichter quer, Staub. Additiv ueber dem Weltbild, damit die Erde nicht truebe wird.
+const glassRefl = (() => {
+  const S = 512, c = document.createElement('canvas'); c.width = c.height = S; const g = c.getContext('2d');
+  g.fillStyle = '#000'; g.fillRect(0, 0, S, S);
+  g.save(); g.translate(S / 2, S / 2); g.rotate(-0.42);
+  [[-140, 26, 'rgba(120,175,240,.20)'], [40, 12, 'rgba(150,200,255,.13)'], [150, 40, 'rgba(90,140,210,.10)']].forEach(([y, hh, col]) => {
+    const gr = g.createLinearGradient(0, y - hh, 0, y + hh);
+    gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(0.5, col); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = gr; g.fillRect(-S, y - hh, S * 2, hh * 2);
+  });
+  g.restore();
+  const gr2 = g.createLinearGradient(0, S * 0.58, 0, S);
+  gr2.addColorStop(0, 'rgba(0,0,0,0)'); gr2.addColorStop(1, 'rgba(95,155,230,.26)');
+  g.fillStyle = gr2; g.fillRect(0, S * 0.58, S, S * 0.42);
+  for (let i = 0; i < 300; i++) {
+    const x = Math.random() * S, y = Math.random() * S, r = 0.5 + Math.random() * 2.2;
+    g.fillStyle = `rgba(210,225,245,${0.02 + Math.random() * 0.07})`;
+    g.beginPath(); g.arc(x, y, r, 0, 6.283); g.fill();
+  }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+})();
+const matGlass = new THREE.MeshBasicMaterial({ map: glassRefl, transparent: true, opacity: 0.25, blending: THREE.AdditiveBlending, depthWrite: false });
+
+// Fensterausschnitt exakt aus der Kamera-Projektion herleiten, damit 3D-Rahmen und
+// SVG-Visier bei jedem Seitenverhaeltnis deckungsgleich sitzen.
+const WIN_D = 0.62;
+const cock = { built: false };
+function ndcToLocal(x, y, dist, invP) {
+  const v = new THREE.Vector4(x, y, -1, 1).applyMatrix4(invP);
+  v.divideScalar(v.w);
+  return new THREE.Vector3(v.x, v.y, v.z).multiplyScalar(dist / -v.z);
+}
+function buildCockpit3D() {
+  while (cockRig.children.length) { const o = cockRig.children.pop(); o.geometry && o.geometry.dispose(); }
+  const W = innerWidth, H = innerHeight, port = H > W;
+  const fov = 46 * (1 + 0.36);                     // Cockpit-FOV wie im Frame-Loop
+  cockCam.fov = fov; cockCam.aspect = W / H;
+  cockCam.setViewOffset(W, H, 0, (H / 2 - cpGeom.axisY), W, H);
+  cockCam.updateProjectionMatrix();
+  const invP = new THREE.Matrix4().copy(cockCam.projectionMatrix).invert();
+  const sx = (px) => (px / W) * 2 - 1, sy = (py) => -((py / H) * 2 - 1);
+  // Der ganze Innenraum wird in BILDSCHIRM-Koordinaten aufgebaut und erst dann in die
+  // gewuenschte Tiefe projiziert. Feste Meter-Offsets landen sonst je nach Seitenverhaeltnis
+  // ausserhalb des Sichtkegels — genau daran ist der erste Anlauf gescheitert (nur die
+  // Schottplatte war im Bild, Sims, Konsolen und Haende lagen unsichtbar darunter).
+  const P = (px, py, d) => ndcToLocal(sx(px), sy(py), d, invP);
+
+  const { wx0, wx1, wy0, wy1, ins } = cpGeom.win;   // eine Quelle fuer Layout und 3D-Bau
+  const FW = Math.max(14, Math.min(W, H) * 0.028);   // Rahmenbreite in Pixeln
+  const D_GLASS = 0.72, D_FACE = 0.50, D_WALL = 0.515;
+  const D_SILL_T = 0.495, D_SILL_B = 0.27, D_OVER = 0.40, D_HAND = 0.32;
+  const S = Math.abs(ndcToLocal(1, 0, D_FACE, invP).x - ndcToLocal(-1, 0, D_FACE, invP).x) / 0.97;
+
+  // ---------- Konturen in Pixeln ----------
+  function rounded(pts, r, seg) {
+    const out = [], n = pts.length;
+    for (let i = 0; i < n; i++) {
+      const p = pts[i], pv = pts[(i - 1 + n) % n], nx = pts[(i + 1) % n];
+      const a = Math.hypot(pv[0] - p[0], pv[1] - p[1]) || 1, b = Math.hypot(nx[0] - p[0], nx[1] - p[1]) || 1;
+      const q = Math.min(r, a / 2, b / 2);
+      const A = [p[0] + (pv[0] - p[0]) / a * q, p[1] + (pv[1] - p[1]) / a * q];
+      const B = [p[0] + (nx[0] - p[0]) / b * q, p[1] + (nx[1] - p[1]) / b * q];
+      for (let s = 0; s <= seg; s++) {
+        const t = s / seg, u = 1 - t;
+        out.push([u * u * A[0] + 2 * u * t * p[0] + t * t * B[0], u * u * A[1] + 2 * u * t * p[1] + t * t * B[1]]);
+      }
+    }
+    return out;
+  }
+  function offset(o, d) {                            // nach aussen versetzte Kontur
+    const n = o.length, res = [];
+    for (let i = 0; i < n; i++) {
+      const p = o[i], a = o[(i - 1 + n) % n], b = o[(i + 1) % n];
+      let ex = b[0] - a[0], ey = b[1] - a[1];
+      const l = Math.hypot(ex, ey) || 1; ex /= l; ey /= l;
+      res.push([p[0] + ey * d, p[1] - ex * d]);
+    }
+    return res;
+  }
+  const inner = rounded([[wx0 + ins, wy0], [wx1 - ins, wy0], [wx1, wy1], [wx0, wy1]], (wx1 - wx0) * 0.055, 9);
+  const outer = offset(inner, FW);
+  const outer2 = offset(inner, FW * 1.9);
+
+  // ---------- Bau-Helfer ----------
+  // Vierecke bekommen ihre Normale immer zur Kamera gedreht — sonst kippt ein Panel
+  // je nach Umlaufsinn ins Unbeleuchtete und wird schwarz.
+  function quad(a, b, c, d, mat, uv) {
+    const n1 = new THREE.Vector3().subVectors(b, a).cross(new THREE.Vector3().subVectors(c, a));
+    const flip = n1.dot(new THREE.Vector3().copy(a).negate()) < 0;
+    const A = a, C = c, B = flip ? d : b, D = flip ? b : d;
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute([
+      A.x, A.y, A.z, B.x, B.y, B.z, C.x, C.y, C.z,
+      A.x, A.y, A.z, C.x, C.y, C.z, D.x, D.y, D.z], 3));
+    const u = uv || 1;
+    g.setAttribute('uv', new THREE.Float32BufferAttribute([0, u, u, u, u, 0, 0, u, u, 0, 0, 0], 2));
+    g.computeVertexNormals();
+    const m = new THREE.Mesh(g, mat); cockRig.add(m); return m;
+  }
+  function strip(ptsA, ptsB, dA, dB, mat) {          // geschlossenes Band entlang einer Kontur
+    const n = ptsA.length, pos = [], uvs = [];
+    const v = (p, d) => P(p[0], p[1], d);
+    for (let i = 0; i < n; i++) {
+      const j = (i + 1) % n;
+      const a = v(ptsA[i], dA), b = v(ptsA[j], dA), c = v(ptsB[j], dB), d = v(ptsB[i], dB);
+      const nrm = new THREE.Vector3().subVectors(b, a).cross(new THREE.Vector3().subVectors(c, a));
+      const fl = nrm.dot(new THREE.Vector3().copy(a).negate()) < 0;
+      const q = fl ? [a, d, c, a, c, b] : [a, b, c, a, c, d];
+      q.forEach(p => pos.push(p.x, p.y, p.z));
+      const u0 = i / n, u1 = (i + 1) / n;
+      const t = fl ? [[u0, 1], [u0, 0], [u1, 0], [u0, 1], [u1, 0], [u1, 1]] : [[u0, 1], [u1, 1], [u1, 0], [u0, 1], [u1, 0], [u0, 0]];
+      t.forEach(([x, y]) => uvs.push(x * 6, y));
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2));
+    g.computeVertexNormals();
+    const m = new THREE.Mesh(g, mat); cockRig.add(m); return m;
+  }
+  function bar(p1, p2, r, mat) {
+    const d = new THREE.Vector3().subVectors(p2, p1);
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, d.length(), 10), mat);
+    m.position.copy(p1).addScaledVector(d, 0.5);
+    m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.clone().normalize());
+    cockRig.add(m); return m;
+  }
+
+  // ---------- 1) Schott: alles ausser der Scheibe ----------
+  const wallShape = new THREE.Shape();
+  [[-0.55 * W, -0.75 * H], [1.55 * W, -0.75 * H], [1.55 * W, 1.85 * H], [-0.55 * W, 1.85 * H]]
+    .forEach(([x, y], i) => { const q = P(x, y, D_WALL); i ? wallShape.lineTo(q.x, q.y) : wallShape.moveTo(q.x, q.y); });
+  const holePath = new THREE.Path();
+  outer.slice().reverse().forEach((p, i) => { const q = P(p[0], p[1], D_WALL); i ? holePath.lineTo(q.x, q.y) : holePath.moveTo(q.x, q.y); });
+  holePath.closePath(); wallShape.holes.push(holePath);
+  const wall = new THREE.Mesh(new THREE.ShapeGeometry(wallShape, 12), matInt);
+  wall.position.z = -D_WALL; cockRig.add(wall);
+
+  // ---------- 2) Fensterlaibung: echte Materialstaerke ----------
+  strip(inner, inner, D_FACE, D_GLASS + 0.02, matTrim);          // Laibung nach aussen
+  strip(inner, outer, D_FACE, D_FACE - 0.014, matTrim);          // Rahmenflaeche mit leichter Fase
+  strip(outer, outer2, D_FACE - 0.014, D_FACE + 0.004, matInt);  // Uebergang zum Schott
+  // Dichtung: dunkler Ring direkt an der Scheibe
+  strip(inner, inner, D_GLASS + 0.02, D_GLASS + 0.055, matSeal);
+  // Schrauben rundum
+  for (let i = 0; i < inner.length; i += 3) {
+    const p = offset(inner, FW * 0.55)[i];
+    const b = new THREE.Mesh(new THREE.SphereGeometry(0.0042 * S, 8, 6), matTrim);
+    b.position.copy(P(p[0], p[1], D_FACE - 0.018)); cockRig.add(b);
+  }
+
+  // ---------- 3) Scheibe ----------
+  {
+    const a = P(wx0 - FW, wy0 - FW, D_GLASS), b = P(wx1 + FW, wy0 - FW, D_GLASS);
+    const c = P(wx1 + FW, wy1 + FW, D_GLASS), d = P(wx0 - FW, wy1 + FW, D_GLASS);
+    quad(a, b, c, d, matGlass, 1);
+  }
+
+  // ---------- 4) Instrumentenbrett unter der Scheibe ----------
+  const sillTop = wy1 + FW * 0.9;
+  const sA = P(-0.55 * W, sillTop, D_SILL_T), sB = P(1.55 * W, sillTop, D_SILL_T);
+  const sC = P(1.55 * W, 1.75 * H, D_SILL_B), sD = P(-0.55 * W, 1.75 * H, D_SILL_B);
+  quad(sA, sB, sC, sD, matInt, 3);
+  bar(P(-0.55 * W, sillTop, D_SILL_T - 0.008), P(1.55 * W, sillTop, D_SILL_T - 0.008), 0.011 * S, matTrim);  // Kantenschutz
+  // Blendschutz: kurze Abdeckung, die vom Rahmen ueber das Brett kragt
+  quad(P(-0.55 * W, wy1 + FW * 0.2, D_FACE - 0.02), P(1.55 * W, wy1 + FW * 0.2, D_FACE - 0.02),
+       P(1.55 * W, sillTop + FW * 0.5, D_SILL_T - 0.075), P(-0.55 * W, sillTop + FW * 0.5, D_SILL_T - 0.075), matPad, 2);
+
+  // ---------- 5) Deckenpaneel mit Schalterreihen ----------
+  const overBot = wy0 - FW * 0.9;
+  quad(P(-0.55 * W, -0.85 * H, D_OVER), P(1.55 * W, -0.85 * H, D_OVER),
+       P(1.55 * W, overBot, D_FACE - 0.005), P(-0.55 * W, overBot, D_FACE - 0.005), matInt, 3);
+  for (let i = 0; i < 18; i++) {
+    const px = wx0 + (i % 9 + 0.5) * (wx1 - wx0) / 9, py = overBot - FW * (0.9 + Math.floor(i / 9) * 1.5);
+    const sw = new THREE.Mesh(new THREE.BoxGeometry(0.008 * S, 0.018 * S, 0.008 * S), matTrim);
+    sw.position.copy(P(px, py, D_FACE - 0.03)); sw.rotation.x = 0.4; cockRig.add(sw);
+    if (i % 3 === 0) {
+      const led = new THREE.Mesh(new THREE.SphereGeometry(0.0045 * S, 8, 6), i % 6 ? matBtnG : matBtnA);
+      led.position.copy(P(px + FW * 0.7, py, D_FACE - 0.03)); cockRig.add(led);
+    }
+  }
+  // Strukturrippen links und rechts der Scheibe
+  [wx0 - FW * 2.3, wx1 + FW * 2.3].forEach(px => {
+    bar(P(px, overBot - FW, D_FACE - 0.02), P(px, sillTop + FW, D_FACE - 0.02), 0.011 * S, matInt);
+  });
+
+  // ---------- 6) Gurtzeug: verankert den Blick als Ego-Perspektive ----------
+  // Handschuhe wurden bewusst gestrichen: in dieser Kroppung lesen sie sich als helle
+  // Knollen, nicht als Haende. Was den Blick traegt, sind Helmrand, Nasenschatten und
+  // die dunkle Brustpartie am unteren Rand.
+  [[-1], [1]].forEach(([sgn]) => {
+    const s1 = P(W * (0.5 + sgn * 0.10), H * 1.00, D_HAND + 0.03);
+    const s2 = P(W * (0.5 + sgn * 0.46), H * 1.42, D_HAND + 0.12);
+    const st = bar(s1, s2, 0.026 * S, matStrap); st.scale.z = 0.35;
+  });
+
+  // ---------- 7) Untere Konsole: Griffleiste und Statuslampen unter den Displays ----------
+  {
+    const yb = H * 0.935, d = D_SILL_B + 0.075;
+    bar(P(W * 0.055, yb, d), P(W * 0.945, yb, d), 0.013 * S, matTrim);
+    for (let i = 0; i < 9; i++) {
+      const px = W * (0.10 + i * 0.10);
+      const led = new THREE.Mesh(new THREE.SphereGeometry(0.0042 * S, 8, 6), i === 4 ? matBtnA : matBtnG);
+      led.position.copy(P(px, yb + H * 0.030, d - 0.01)); cockRig.add(led);
+      const cap = new THREE.Mesh(new THREE.BoxGeometry(0.020 * S, 0.011 * S, 0.014 * S), matSuitTrim);
+      cap.position.copy(P(px, yb + H * 0.052, d - 0.01)); cockRig.add(cap);
+    }
+  }
+
+  quad(P(-0.55 * W, H * 1.02, D_HAND + 0.02), P(1.55 * W, H * 1.02, D_HAND + 0.02),
+       P(1.55 * W, H * 1.9, D_HAND - 0.14), P(-0.55 * W, H * 1.9, D_HAND - 0.14), matStrap, 2);
+
+  cock.built = true;
+  cock.win = { inner, outer, FW, D_FACE, D_GLASS };
+}
+
+// Licht im Innenraum: Displayschein, Sonne durchs Fenster, Erdlicht
+const cockAmb = new THREE.AmbientLight(0x3b4761, 1.15); cockScene.add(cockAmb);
+// Lichtkegel direkt an der Scheibe: sorgt fuer den Abfall zu den Ecken, den jedes echte
+// Kabinenfoto hat. Eine reine Richtungsquelle leuchtet den Raum flach und tot aus.
+const cockGlow = new THREE.PointLight(0xcfe2ff, 0, 3.4, 1.55); cockScene.add(cockGlow);
+const cockWin = new THREE.DirectionalLight(0xdbe8ff, 2.0); cockScene.add(cockWin); cockScene.add(cockWin.target);
+const cockDisp = new THREE.PointLight(0x74b4ff, 0, 1.9, 1.35); cockScene.add(cockDisp);
+const cockDisp2 = new THREE.PointLight(0xffb347, 0, 1.4, 1.5); cockScene.add(cockDisp2);
+const cockSun = new THREE.DirectionalLight(0xfff3e2, 2.6); cockScene.add(cockSun); cockScene.add(cockSun.target);
+const cockEarth = new THREE.HemisphereLight(0x5b93e4, 0x1a1f27, 1.25); cockScene.add(cockEarth);
+
+// ---------- Nachladen: NASA-Originale in voller Aufloesung ----------
+// Der erste Frame laeuft mit 2K, danach werden die grossen Karten seriell nachgeschoben
+// und in die bestehenden Materialien getauscht — kein Ruckler, kein Nachladen sichtbar.
+let hiresDone = false;
+function hires() {
+  if (hiresDone) return; hiresDone = true;
+  const E = small ? '4k' : '8k';
+  const jobs = [
+    ['textures/earth_day_' + E + '.jpg', true,  t => { earthMat.map = t; earthMat.needsUpdate = true; }],
+    ['textures/starmap_4k.jpg',          true,  t => { t.mapping = THREE.EquirectangularReflectionMapping; scene.background = t; }],
+    ['textures/earth_clouds_4k.jpg',     false, t => { clouds.material.alphaMap = t; clouds.material.needsUpdate = true; }],
+    ['textures/moon_color_4k.jpg',       true,  t => { moon.material.map = t; moon.material.needsUpdate = true; }],
+    ['textures/earth_night_4k.jpg',      true,  t => { earthMat.emissiveMap = t; earthMat.needsUpdate = true; }],
+  ];
+  let i = 0;
+  const next = () => {
+    if (i >= jobs.length) return;
+    const [url, srgb, apply] = jobs[i++];
+    tl.load(url, t => { if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = Math.min(16, MAXA); apply(t); next(); }, undefined, next);
+  };
+  next();
+}
+
 // ---------- post ----------
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), small ? 0.4 : 0.5, 0.4, 0.92);
+// Cockpit-Ebene: eigener Pass, loescht nur den Tiefenpuffer und zeichnet den Innenraum davor
+const cockPass = new RenderPass(cockScene, cockCam);
+cockPass.clear = false; cockPass.clearDepth = true; cockPass.enabled = false;
+composer.addPass(cockPass);
+const cockMats = [matInt, matTrim, matPad, matSuit, matSuitTrim, matSeal, matStrap, matBtnG, matBtnA, matGlass];
+cockMats.forEach(m => { m.userData.baseOpacity = m.opacity; m.transparent = true; });
+
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), small ? 0.32 : 0.42, 0.55, 0.97);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
 
@@ -776,6 +1391,7 @@ const hT = document.getElementById('hT'), hA = document.getElementById('hA'), hV
 const hint = document.getElementById('hint'), hintTxt = document.getElementById('hintTxt'), note = document.getElementById('note');
 const trackDot = document.getElementById('trackDot'), trackFill = document.getElementById('trackFill'), sky = document.getElementById('sky');
 const pillBtns = [...document.querySelectorAll('.pill button')];
+const cpPanelEl = document.getElementById('cpPanel');
 
 
 // ---------- cockpit: helmet visor, window aperture, glass panel ----------
@@ -784,7 +1400,8 @@ const cpFrame = document.getElementById('cpFrame'), cpVisor = document.getElemen
 const $ = (id) => document.getElementById(id);
 const cpEls = {
   framePath: $('cpFramePath'), edge: $('cpFrameEdge'), edge2: $('cpFrameEdge2'), struts: $('cpStruts'),
-  visorPath: $('cpVisorPath'), rim: $('cpVisorRim'), rim2: $('cpVisorRim2'), clip: $('visClipPath'),
+  visorPath: $('cpVisorPath'), rim: $('cpVisorRim'), clip: $('visClipPath'),
+  nose: $('cpNose'), fog: $('cpFog'), rfRot: $('rfRot'),
   rf1: $('rf1'), rf2: $('rf2'), rf3: $('rf3'), exit: $('cpExit'),
   navPath: $('navPath'), navDot: $('navDot'), navEta: $('navEta'), navDv: $('navDv'), navSt: $('navSt'),
   adiG: $('adiG'), pfdMode: $('pfdMode'), pfdVel: $('pfdVel'), pfdAlt: $('pfdAlt'), pfdPitch: $('pfdPitch'),
@@ -815,38 +1432,53 @@ function blobPath(x0, y0, x1, y1, kx, ky) {
          `C${f(x1)} ${f(ym + dy)} ${f(xm + dx)} ${f(y1)} ${f(xm)} ${f(y1)}` +
          `C${f(xm - dx)} ${f(y1)} ${f(x0)} ${f(ym + dy)} ${f(x0)} ${f(ym)}Z`;
 }
+// Helmoeffnung aus der Ego-Sicht: weite Ellipse, oben flacher, unten mittig
+// durch den Nasenruecken angehoben — das ist die Silhouette, die man im eigenen Helm sieht.
+function helmetPath(W, H) {
+  const cx = W / 2, L = W * 0.038, R = W - L, T = H * 0.022, B = H * 0.995;
+  const tall = H > W;
+  const ym = (T + B) / 2, dx = (R - L) * (tall ? 0.44 : 0.30), dy = (ym - T) * (tall ? 0.40 : 0.56);
+  const nw = W * 0.30, nh = H * 0.055;
+  const f = (v) => v.toFixed(1);
+  return `M${f(L)} ${f(ym)}` +
+    `C${f(L)} ${f(ym - dy)} ${f(cx - dx)} ${f(T)} ${f(cx)} ${f(T)}` +
+    `C${f(cx + dx)} ${f(T)} ${f(R)} ${f(ym - dy)} ${f(R)} ${f(ym)}` +
+    `C${f(R)} ${f(ym + dy * 0.92)} ${f(cx + dx * 1.05)} ${f(B)} ${f(cx + nw / 2)} ${f(B)}` +
+    `C${f(cx + nw * 0.22)} ${f(B)} ${f(cx + nw * 0.20)} ${f(B - nh)} ${f(cx)} ${f(B - nh)}` +
+    `C${f(cx - nw * 0.20)} ${f(B - nh)} ${f(cx - nw * 0.22)} ${f(B)} ${f(cx - nw / 2)} ${f(B)}` +
+    `C${f(cx - dx * 1.05)} ${f(B)} ${f(L)} ${f(ym + dy * 0.92)} ${f(L)} ${f(ym)}Z`;
+}
 function layoutCockpit() {
   const W = innerWidth, H = innerHeight, port = H > W;
   cpFrame.setAttribute('viewBox', `0 0 ${W} ${H}`); cpVisor.setAttribute('viewBox', `0 0 ${W} ${H}`);
   const full = `M0 0H${W}V${H}H0Z`;
   // windscreen aperture
-  const wx0 = W * (port ? 0.095 : 0.155), wx1 = W - wx0;
-  const wy0 = H * (port ? 0.115 : 0.085), wy1 = H * (port ? 0.495 : 0.545);
+  const wx0 = W * (port ? 0.055 : 0.155), wx1 = W - wx0;
+  const wy0 = H * (port ? 0.105 : 0.085), wy1 = H * (port ? 0.470 : 0.545);
   const ins = (wx1 - wx0) * 0.055;
   cpGeom.axisY = (wy0 + wy1) / 2;
+  cpGeom.win = { wx0, wx1, wy0, wy1, ins };
   const wp = roundPoly([[wx0 + ins, wy0], [wx1 - ins, wy0], [wx1, wy1], [wx0, wy1]], Math.min(36, (wx1 - wx0) * 0.07));
-  cpEls.framePath.setAttribute('d', full + wp);
-  cpEls.edge.setAttribute('d', wp); cpEls.edge2.setAttribute('d', wp);
+  cpEls.framePath.setAttribute('d', '');            // Rahmen kommt jetzt aus der 3D-Ebene
+  cpEls.edge.setAttribute('d', ''); cpEls.edge2.setAttribute('d', '');
   // interior structure: sill under the glass + two frame ribs
   const sy = wy1, mid = (wx0 + wx1) / 2;
-  cpEls.struts.innerHTML =
-    `<path d="M${wx0} ${sy + 10}H${wx1}"/>` +
-    `<path d="M${mid} ${wy0 + 4}V${wy1 - 4}" stroke="rgba(150,190,240,.07)"/>` +
-    `<path d="M${wx0 - 26} ${wy0 - 18}H${wx1 + 26}"/>` +
-    `<path d="M${W * 0.5 - 120} ${sy + 26}H${W * 0.5 + 120}" stroke="rgba(150,190,240,.06)"/>`;
-  // helmet visor aperture
-  const vx0 = W * 0.05, vx1 = W * 0.95, vy0 = H * 0.035, vy1 = H * 0.972;
-  const vp = blobPath(vx0, vy0, vx1, vy1, 0.34, 0.46);
+  cpEls.struts.innerHTML = '';
+  // Helmoeffnung: breit, oben flach, unten mittig durch die Nase angehoben
+  const vp = helmetPath(W, H);
   cpEls.visorPath.setAttribute('d', full + vp);
-  cpEls.rim.setAttribute('d', vp); cpEls.rim2.setAttribute('d', vp); cpEls.clip.setAttribute('d', vp);
-  const setR = (el, x, y, w, h, rot) => { el.setAttribute('x', x); el.setAttribute('y', y); el.setAttribute('width', w); el.setAttribute('height', h); if (rot) el.setAttribute('transform', rot); };
-  const rot = `rotate(-17 ${W / 2} ${H / 2})`;
-  setR(cpEls.rf1, -W * 0.3, H * 0.055, W * 1.6, H * 0.085, rot);
-  setR(cpEls.rf2, -W * 0.3, H * 0.28, W * 1.6, H * 0.038, rot);
-  setR(cpEls.rf3, 0, H * 0.42, W, H * 0.58);
+  cpEls.rim.setAttribute('d', vp); cpEls.clip.setAttribute('d', vp);
+  const setE = (el, cx, cy, rx, ry) => { el.setAttribute('cx', cx); el.setAttribute('cy', cy); el.setAttribute('rx', rx); el.setAttribute('ry', ry); };
+  setE(cpEls.nose, W / 2, H * 1.0, W * 0.27, H * 0.145);
+  setE(cpEls.fog, W / 2, H * 1.02, W * 0.44, H * 0.12);
+  const setR = (el, x, y, w, h) => { el.setAttribute('x', x); el.setAttribute('y', y); el.setAttribute('width', w); el.setAttribute('height', h); };
+  cpEls.rfRot.setAttribute('transform', `rotate(-16 ${W / 2} ${H / 2})`);
+  setR(cpEls.rf1, -W * 0.3, H * 0.045, W * 1.6, H * 0.075);
+  setR(cpEls.rf2, -W * 0.3, H * 0.30, W * 1.6, H * 0.034);
+  setR(cpEls.rf3, 0, H * 0.44, W, H * 0.56);
 }
 layoutCockpit();
-addEventListener('resize', layoutCockpit);
+addEventListener('resize', () => { layoutCockpit(); if (typeof cock !== 'undefined' && cock.built) buildCockpit3D(); });
 if (isTouch) cpEls.exit.textContent = 'Tap to return outside';
 
 state.cock = 0; state.cockTarget = 0;
@@ -873,6 +1505,8 @@ addEventListener('keydown', (e) => {
 });
 cpEls.comm.addEventListener('pointerdown', () => cpEls.comm.classList.add('rev'));
 window.__rb.setCockpit = setCockpit;
+Object.assign(window.__rb, { cockScene, cockCam, cockRig, cockPass, cock, buildCockpit3D });
+try { buildCockpit3D(); } catch (e) { console.error('cockpit3d build failed', e); cock.failed = true; }
 
 // ---------- helpers ----------
 const sm = (a, b, x) => { const t = THREE.MathUtils.clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
@@ -882,7 +1516,8 @@ const rocketPos = new THREE.Vector3(), rocketDir = new THREE.Vector3(0, 1, 0);
 const camPos = new THREE.Vector3(), camLook = new THREE.Vector3();
 const A_pos = new THREE.Vector3(), A_look = new THREE.Vector3(), B_pos = new THREE.Vector3(), B_look = new THREE.Vector3(), C_pos = new THREE.Vector3(), C_look = new THREE.Vector3();
 const shakeV = new THREE.Vector3();
-const IN_pos = new THREE.Vector3(), IN_look = new THREE.Vector3(), aim = new THREE.Vector3(), sideI = new THREE.Vector3(), binI = new THREE.Vector3(), tmpA = new THREE.Vector3();
+const IN_pos = new THREE.Vector3(), IN_look = new THREE.Vector3(), aim = new THREE.Vector3(), aim0 = new THREE.Vector3(0, 0, -1),
+      cockHelper = new THREE.Object3D(), rigRight = new THREE.Vector3(), rigUp = new THREE.Vector3(), rigFwd = new THREE.Vector3(), sideI = new THREE.Vector3(), binI = new THREE.Vector3(), tmpA = new THREE.Vector3();
 
 // rocket kinematics
 function evalRocket(p) {
@@ -995,7 +1630,7 @@ function frame(now) {
   tmpQ.setFromUnitVectors(UP, rocketDir);
   rocket.quaternion.copy(tmpQ);
   // slow roll while flying
-  rocket.rotateY(t * 0.085);
+  rocket.rotateY(0.62 + t * 0.085 * sm(0.012, 0.07, p));   // festgeklemmt auf dem Mount, Rollen erst im Flug
   const thr = throttleFor(p);
   // pad vibration on ignition
   if (p > 0.008 && p < 0.06) { rocket.position.x += (Math.random() - 0.5) * 0.06 * thr; rocket.position.z += (Math.random() - 0.5) * 0.06 * thr; }
@@ -1017,9 +1652,15 @@ function frame(now) {
   const padA = 1 - sm(0.07, 0.16, p);
   pad.visible = padA > 0.001;
   if (pad.visible) padMats.forEach(([m, o]) => { m.opacity = o * padA * (introDone ? 1 : introFade); });
-  { const fi = padA * (introDone ? 1 : introFade) * 4.5; floods.forEach(l => l.intensity = fi); }
-  // clouds / bodies
+  { const fi = padA * (introDone ? 1 : introFade) * 13; floods.forEach(l => l.intensity = fi * (l.userData.k || 1)); }
+  // Weltraum-Fill und Atmosphaerenschale auf dem Pad zuruecknehmen — sonst milchiger Schleier ueber Beton und Stahl
+  fill.intensity = fill.userData.base * (1 - 0.72 * padA);
+  hemi.intensity = 0.30 - 0.17 * padA;
+  atmo2.visible = padA < 0.85;
+  atmoMat.uniforms.uInt.value = 1.35 * (1 - 0.55 * padA);
+  // clouds / bodies — die Wolkenschale liegt ueber dem Startgelaende, auf dem Pad blenden wir sie weg
   clouds.rotation.y += dt * 0.006; earth.rotation.y += dt * 0.0012; moon.rotation.y += dt * 0.004;
+  if (introDone) clouds.material.opacity = 0.9 * sm(0.012, 0.085, p);
 
   // ----- camera rig -----
   // A: on the pad, low & wide — rocket sits right of centre, title lives on the left
@@ -1088,6 +1729,7 @@ function frame(now) {
       tmpA.subVectors(M, IN_pos).normalize().multiplyScalar(0.85).addScaledVector(rocketDir, 0.53).normalize();
       aim.lerp(tmpA, sm(T_ORBIT - 0.12, T_ORBIT + 0.04, p)).normalize();
     }
+    aim0.copy(aim);                                   // Cockpit-Rahmen sitzt fest im Fahrzeug
     aim.applyAxisAngle(rocketDir, -state.smx * 0.30 * sway);
     tmpA.crossVectors(aim, rocketDir).normalize();
     aim.applyAxisAngle(tmpA, -state.smy * 0.16 * sway);
@@ -1098,6 +1740,8 @@ function frame(now) {
     camera.up.copy(UP).lerp(rocketDir, ck).normalize();
   } else if (camera.up.y !== 1) camera.up.set(0, 1, 0);
   { const fo = 1 - sm(0.55, 0.9, ck); flapMat.opacity = fo; rocket.userData.flaps.forEach(f => f.visible = fo > 0.01); }
+  const inside = ck > 0.62;
+  rocket.visible = !inside; particles.visible = !inside; smoke.visible = !inside;
   camera.fov = baseFov * (1 + 0.36 * ck);
   if (ck > 0.0004) camera.setViewOffset(innerWidth, innerHeight, 0, (innerHeight / 2 - cpGeom.axisY) * ck, innerWidth, innerHeight);
   else if (camera.view && camera.view.enabled) camera.clearViewOffset();
@@ -1106,9 +1750,59 @@ function frame(now) {
   camera.lookAt(camLook);
   fill.position.copy(camera.position); fill.target.position.copy(rocketPos);
 
+  // ----- 3D-Cockpit mitfuehren -----
+  const cockVis = ck > 0.55 ? sm(0.55, 1.0, ck) : 0;
+  cockPass.enabled = cockVis > 0.01;
+  if (cockPass.enabled) {
+    if (!cock.built && !cock.failed) { try { buildCockpit3D(); } catch (e) { console.error(e); cock.failed = true; } }
+    cockMats.forEach(m => m.opacity = cockVis * m.userData.baseOpacity);
+    cockRig.position.copy(camera.position);
+    cockHelper.position.copy(camera.position);
+    cockHelper.up.copy(rocketDir);
+    // Object3D.lookAt richtet +Z auf das Ziel (anders als bei Kameras) — der Innenraum
+    // ist mit -Z nach vorn gebaut, also zielen wir bewusst nach hinten.
+    cockHelper.lookAt(tmpA.copy(camera.position).addScaledVector(aim0, -10));
+    cockRig.quaternion.copy(cockHelper.quaternion);
+    cockRig.updateMatrixWorld();
+    rigRight.setFromMatrixColumn(cockRig.matrixWorld, 0);
+    rigUp.setFromMatrixColumn(cockRig.matrixWorld, 1);
+    rigFwd.setFromMatrixColumn(cockRig.matrixWorld, 2);
+    // Kopfversatz: Blick wandert, der Rahmen bleibt stehen — das erzeugt die Parallaxe
+    cockCam.position.copy(camera.position)
+      .addScaledVector(rigRight, state.smx * 0.045)
+      .addScaledVector(rigUp, -state.smy * 0.032);
+    if (!reduced) {                                  // Atmen + Triebwerksvibration
+      cockCam.position.addScaledVector(rigUp, Math.sin(t * 1.15) * 0.0035)
+        .addScaledVector(rigRight, (Math.random() - 0.5) * 0.0025 * thr)
+        .addScaledVector(rigUp, (Math.random() - 0.5) * 0.0025 * thr);
+    }
+    cockCam.quaternion.copy(camera.quaternion);
+    cockCam.fov = camera.fov; cockCam.aspect = camera.aspect;
+    if (camera.view && camera.view.enabled) cockCam.setViewOffset(innerWidth, innerHeight, 0, camera.view.offsetY, innerWidth, innerHeight);
+    else cockCam.clearViewOffset();
+    cockCam.updateProjectionMatrix();
+    // Sonne faellt durchs Fenster, Erdlicht von unten
+    cockSun.position.copy(cockCam.position).addScaledVector(SUN, 6);
+    cockSun.target.position.copy(cockCam.position);
+    cockSun.intensity = 2.6 * (0.35 + 0.65 * THREE.MathUtils.clamp(aim0.dot(SUN) + 0.6, 0, 1));
+    cockEarth.intensity = 0.5 * (1 - sm(0.2, 0.62, p)) + 0.16;
+    cockDisp.position.copy(cockCam.position).addScaledVector(rigFwd, -0.42).addScaledVector(rigUp, -0.30);
+    cockDisp2.position.copy(cockCam.position).addScaledVector(rigFwd, -0.40).addScaledVector(rigUp, -0.33).addScaledVector(rigRight, 0.26);
+    cockDisp.intensity = 2.4 * cockVis; cockDisp2.intensity = 0.85 * cockVis;
+    cpPanelEl.style.transform = `perspective(1100px) rotateX(8deg) translate3d(${(-state.smx * 22).toFixed(1)}px,${(-state.smy * 13).toFixed(1)}px,0)`;
+    // Licht faellt durchs Fenster nach innen — nah an der Erde grell, im tiefen Raum nur noch Restlicht
+    cockWin.position.copy(cockCam.position).addScaledVector(rigFwd, 3.2).addScaledVector(rigUp, 1.1);
+    cockWin.target.position.copy(cockCam.position).addScaledVector(rigFwd, -1);
+    const outBright = 1 - sm(0.18, 0.64, p);
+    cockWin.intensity = (0.45 + 1.7 * outBright) * cockVis;
+    cockGlow.position.copy(cockCam.position).addScaledVector(rigFwd, 0.85).addScaledVector(rigUp, 0.28);
+    cockGlow.intensity = (0.5 + 2.3 * outBright) * cockVis;
+  }
+
   // exposure/fog with altitude
   const atmoP = 1 - sm(0.03, 0.26, p);
-  scene.fog.density = 0.011 * atmoP;
+  scene.backgroundIntensity = 0.95 * (1 - atmoP) * (introDone ? 1 : introFade);
+  scene.fog.density = 0.0030 * atmoP;
   sky.style.opacity = atmoP.toFixed(3);
   stars.material.uniforms.uAlpha.value = 0.25 + 0.75 * (1 - atmoP);
   stars2.material.uniforms.uAlpha.value = 0.55 * (1 - atmoP);
@@ -1120,8 +1814,8 @@ function frame(now) {
     const i1 = sm(0.2, 1.7, t), i2 = sm(0.9, 3.0, t);
     wireMat.opacity = (1 - i2) * 0.9 * sm(0.0, 0.4, t);
     introFade = i1; solidMats.forEach(m => m.opacity = i1);
-    clouds.material.opacity = 0.85 * i1;
-    if (t > 3.2) { introDone = true; solidMats.forEach(m => { m.opacity = 1; if (!m.userData.keepTransparent) m.transparent = false; m.needsUpdate = true; }); earthWire.visible = false; rocketWire.visible = false; }
+    clouds.material.opacity = 0.9 * i1 * sm(0.012, 0.085, p);
+    if (t > 3.2) { introDone = true; hires(); solidMats.forEach(m => { m.opacity = 1; if (!m.userData.keepTransparent) m.transparent = false; m.needsUpdate = true; }); earthWire.visible = false; rocketWire.visible = false; }
   }
   if (t > 0.15 && !document.body.classList.contains('ready')) { document.body.classList.add('ready'); document.getElementById('curtain').classList.add('gone'); }
 
@@ -1183,5 +1877,8 @@ function frame(now) {
 }
 requestAnimationFrame(frame);
 </script>
+<!-- Lagesensor-Parallaxe fuer Handy/Tablet: schreibt ausschliesslich window.__rb.state.mx/.my.
+     Eigenstaendige Datei gyro.js, damit dieser Block hier klein bleibt. -->
+<script src="gyro.js" defer></script>
 </body>
 </html>
