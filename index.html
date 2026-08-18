@@ -225,6 +225,8 @@ scene.add(sun);
 scene.add(new THREE.HemisphereLight(0x8fb2ff, 0x0a0c14, 0.22));
 const engineLight = new THREE.PointLight(0xffa040, 0, 90, 1.6);
 scene.add(engineLight);
+const fill = new THREE.DirectionalLight(0xbfd0ff, 0.55);
+scene.add(fill); scene.add(fill.target);
 
 // ---------- textures ----------
 const tl = new THREE.TextureLoader();
@@ -371,8 +373,8 @@ scene.add(rocket);
 function plumeMat(inner) {
   return new THREE.ShaderMaterial({
     uniforms: { uTime: { value: 0 }, uThrottle: { value: 0 }, uInner: { value: inner ? 1 : 0 } },
-    vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
-    fragmentShader: `uniform float uTime; uniform float uThrottle; uniform float uInner; varying vec2 vUv;
+    vertexShader: `varying vec2 vUv; varying vec3 vN; varying vec3 vV; void main(){ vUv = uv; vec4 mv = modelViewMatrix*vec4(position,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`,
+    fragmentShader: `uniform float uTime; uniform float uThrottle; uniform float uInner; varying vec2 vUv; varying vec3 vN; varying vec3 vV;
       float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
       void main(){ float y = vUv.y; // 1 at nozzle (cone tip up), 0 at end
         float flick = 0.82 + 0.18*sin(uTime*38.0 + y*24.0) * (0.6+0.4*hash(vec2(floor(uTime*30.0), y*8.0)));
@@ -380,7 +382,8 @@ function plumeMat(inner) {
         vec3 hot = mix(vec3(1.0,0.45,0.12), vec3(1.0,0.86,0.62), core*core);
         if(uInner>0.5) hot = mix(vec3(1.0,0.75,0.4), vec3(1.0,0.97,0.9), core);
         float a = pow(core, 1.6) * flick * uThrottle * (uInner>0.5 ? 1.0 : 0.55);
-        float side = 1.0 - abs(vUv.x*2.0-1.0); // fade to edges of the unwrapped cone
+        float facing = pow(abs(dot(normalize(vN), normalize(vV))), 1.1);
+        a *= 0.15 + 0.85*facing;
         gl_FragColor = vec4(hot*a, a); }`,
     transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide,
   });
@@ -442,6 +445,7 @@ const pad = new THREE.Group();
   gnd.rotation.x = -Math.PI / 2; gnd.position.y = 0.01; pad.add(gnd);
 }
 pad.position.copy(PAD); scene.add(pad);
+const padMats = []; pad.traverse(o => { if (o.isMesh) { o.material = o.material.clone(); o.material.transparent = true; padMats.push([o.material, o.material.opacity]); } });
 
 // intro wireframe (field-scan) — Earth grid + rocket wire, fade out at start
 const wireMat = new THREE.MeshBasicMaterial({ color: 0x8fb4ff, wireframe: true, transparent: true, opacity: 0.0, depthWrite: false, blending: THREE.AdditiveBlending });
@@ -573,7 +577,7 @@ function updateSmoke(dt) {
 const fmtT = (s) => { s = Math.max(0, Math.floor(s)); const m = Math.floor(s / 60), r = s % 60; return (m < 10 ? '0' : '') + m + ':' + (r < 10 ? '0' : '') + r; };
 const fmtAlt = (km) => km < 1000 ? km.toFixed(0) + ' km' : km < 100000 ? (km / 1000).toFixed(1) + ' tkm' : Math.round(km / 1000) + ' tkm';
 const fmtVel = (kmh) => kmh.toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' km/h';
-let phaseName = '', hudTick = 0;
+let phaseName = '', hudTick = 0, lastHudP = -1;
 
 // resize
 function resize() {
@@ -625,6 +629,10 @@ function frame(now) {
   if (thr > 0.05 && p < 0.09) spawnSmoke(2);
   updateSmoke(dt);
 
+  // pad visibility
+  const padA = 1 - sm(0.07, 0.16, p);
+  pad.visible = padA > 0.001;
+  if (pad.visible) padMats.forEach(([m, o]) => { m.opacity = o * padA; });
   // clouds / bodies
   clouds.rotation.y += dt * 0.006; earth.rotation.y += dt * 0.0012; moon.rotation.y += dt * 0.004;
 
@@ -655,8 +663,15 @@ function frame(now) {
     C_look.copy(M).lerp(rocketPos, 0.3);
   }
   const ab = sm(0.035, 0.15, p), bc = sm(0.66, 0.78, p);
-  camPos.copy(A_pos).lerp(B_pos, ab).lerp(C_pos, bc);
   camLook.copy(A_look).lerp(B_look, ab).lerp(C_look, bc);
+  {
+    const dA = A_pos.distanceTo(A_look), dB = B_pos.distanceTo(B_look), dC = C_pos.distanceTo(C_look);
+    const dWant = THREE.MathUtils.lerp(THREE.MathUtils.lerp(dA, dB, ab), dC, bc);
+    camPos.copy(A_pos).lerp(B_pos, ab).lerp(C_pos, bc);
+    tmpV.subVectors(camPos, camLook);
+    const dHave = Math.max(tmpV.length(), 0.001);
+    camPos.copy(camLook).addScaledVector(tmpV, dWant / dHave);
+  }
 
   // mouse orbit around the look target + gentle drift + launch shake
   const sway = reduced ? 0.35 : 1;
@@ -671,6 +686,7 @@ function frame(now) {
   shakeV.set((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake, 0);
   camera.position.add(shakeV);
   camera.lookAt(camLook);
+  fill.position.copy(camera.position); fill.target.position.copy(rocketPos);
 
   // exposure/fog with altitude
   const atmoP = 1 - sm(0.03, 0.26, p);
@@ -696,8 +712,8 @@ function frame(now) {
   const ph = p < 0.012 ? 'Prelaunch' : p < 0.05 ? 'Ignition' : p < 0.2 ? 'Liftoff' : p < 0.42 ? 'Ascent' : p < 0.66 ? 'Translunar transfer' : p < 0.8 ? 'Orbit insertion' : 'Lunar orbit';
   if (ph !== phaseName) { phaseName = ph; phaseTxt.textContent = ph; phaseEl.classList.toggle('live', p >= 0.012); }
   hudTick += dt;
-  if (hudTick > 0.08) {
-    hudTick = 0;
+  if (hudTick > 0.08 || Math.abs(p - lastHudP) > 0.002) {
+    hudTick = 0; lastHudP = p;
     const secs = p * 60 * 62;                                       // T+ in seconds (~62 min to the Moon; cinematic)
     const alt = p < T_ORBIT ? Math.pow(p / T_ORBIT, 2.6) * 384400 : 384400 - 100 + Math.sin(rk.theta) * 60; // km
     const vel = p < 0.012 ? 0 : p < 0.2 ? sm(0.012, 0.2, p) * 28000 : p < 0.66 ? 28000 + sm(0.2, 0.5, p) * 12000 - sm(0.5, 0.66, p) * 22000 : p < 0.8 ? 18000 - sm(0.66, 0.8, p) * 12100 : 5900;
